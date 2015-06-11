@@ -6,119 +6,89 @@ const unsigned int Resolver::NB_STEPS = 7;
 
 
 
-Resolver::Resolver()
+Resolver::Resolver(Master* m, TTF_Font* f)
+:master(m), font(f)
 {
-	is_test = false;
-	compteur = 0;
+	/* INIT RESOLVER */
+	current_step = 0;
 
 	state = SHOW;
 
 	move = false;
-	rotate_x = rotate_y = -20;
 
-	SDL_Init(SDL_INIT_VIDEO);
-    SDL_WM_SetCaption("Rubik Solver",NULL);
-    SDL_SetVideoMode(600, 600, 32, SDL_OPENGL);
+	show_player = false;
 
-    glClearColor(0.1,0.1,0.1,1.);
+	width = master->width;
+	height = master->height;
 
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_LINE_SMOOTH);
+	float ratio = float(width)/float(height);
 
-	id_logo = loadTexture("./res/rubik.png");
+	rubik_pos_x = width*0.5;
+	rubik_pos_y = height*0.5;
+	rubik_size = (ratio>1.6 ? height*0.36 : width*0.25);
 
-	rubik = new Rubik3x3(1,id_logo,"saves/test.rbk");
-	//rubik = new Rubik3x3(1,id_logo);
+	/* INIT TEXTURES */
+	tex_play  = loadTexture((master->path+"/res/tex/play.png").c_str());
+	tex_pause = loadTexture((master->path+"/res/tex/pause.png").c_str());
+	tex_fast  = loadTexture((master->path+"/res/tex/fast.png").c_str());
+	tex_next  = loadTexture((master->path+"/res/tex/next.png").c_str());
 
-	current_step = 0;
-	save.clear();
+	/* RUBIK */
+	rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size,"saves/test.rbk");
+	rubik_test = new Rubik3x3();
+
+	/* BUTTONS */
+	buttons.push_back(new Button(width*0.78,height*0.70,width*0.12,height*0.05," Reset ",font,this,&Resolver::resetRubik));
+	buttons.push_back(new Button(width*0.78,height*0.55,width*0.12,height*0.05,"Resolve",font,this,&Resolver::setResolveMode));
+	buttons.push_back(new Button(width*0.78,height*0.40,width*0.12,height*0.05,"Shuffle",font,this,&Resolver::shuffle));
+	
+	buttons.push_back(new Button(width-height*0.05,height,height*0.05,height*0.05,"X",font,this,&Resolver::quit));
+	
+	buttons.push_back(new Button(width*0.4,height*0.95,width*0.2,height*0.05,"Initial position",font,this,&Resolver::resetRubikRotation));
+
+	buttons.push_back(new Button(width*0.08,height*0.70,width*0.16,height*0.05,"Go to editor",font,this,&Resolver::createRubik));
+	buttons.push_back(new Button(width*0.10,height*0.55,width*0.12,height*0.05,"   Load   ",font,this,&Resolver::createRubik));
+	buttons.push_back(new Button(width*0.10,height*0.40,width*0.12,height*0.05,"   Save   ",font,this,&Resolver::createRubik));
+
+	/* PLAYER */
+	player.push_back(new Button(width*0.5-(height*0.245),height*0.08,height*0.05,height*0.05,tex_fast,true,this,&Resolver::playFastReverse));
+	player.push_back(new Button(width*0.5-(height*0.14),height*0.08,height*0.05,height*0.05,tex_next,true,this,&Resolver::playOneReverse));
+	player.push_back(new Button(width*0.5-(height*0.035),height*0.08,height*0.05,height*0.05,tex_play,false,this,&Resolver::play));
+	player.push_back(new Button(width*0.5+(height*0.07),height*0.08,height*0.05,height*0.05,tex_next,false,this,&Resolver::playOne));
+	player.push_back(new Button(width*0.5+(height*0.175),height*0.08,height*0.05,height*0.05,tex_fast,false,this,&Resolver::playFast));
+
+	player_bar_w = width*0.75;
+	player_bar_h = height*0.005;
+	player_cursor_x = 0;
+	player_cursor_hover = false;
 }
 
 
 
 Resolver::~Resolver()
 {
+	delete rubik_view;
+	delete rubik_test;
 
+	for(vector<Button*>::iterator it=buttons.begin(); it!=buttons.end(); ++it)
+		delete *it;
+
+	for(vector<Button*>::iterator it=player.begin(); it!=player.end(); ++it)
+		delete *it;
 }
 
 
 
-void Resolver::run()
+
+void Resolver::animate(int dt)
 {
-	bool continuer = true;
-    SDL_Event event;
+	if(show_player && rubik_view->state == WAIT)
+		pause();
 
-    int tx = 0;
-    int ty = 0;
-    int dt = 0;
+	if(state == RESOLVE)
+		resolve();
 
-    while (continuer)
-    {
-    	ty = SDL_GetTicks();
-    	dt = ty - tx;
-    	tx = ty;
-
-	    while(SDL_PollEvent(&event))
-	    {
-	        switch(event.type)
-	        {
-	            case SDL_QUIT :
-	                continuer = false;
-	                break;
-
-	            case SDL_MOUSEBUTTONDOWN :
-	            	move = true;
-	            	break;
-
-	            case SDL_MOUSEBUTTONUP :
-	            	move = false;
-	            	break;
-
-	            case SDL_MOUSEMOTION :
-	            	if(move)
-	            	{
-		            	rotate_x -= event.motion.yrel;
-		            	rotate_y -= event.motion.xrel;
-		            }
-	            	break;
-
-	            case SDL_KEYUP :
-	            	switch (event.key.keysym.sym)
-	       			{
-	       				case SDLK_ESCAPE : 
-	       					exit(0);
-	       					break;
-
-	       				case SDLK_SPACE :
-	       					if(state==SHOW) {state=RESOLVE; current_step=0;}
-	       					else state=SHOW;
-	       					break;
-
-	       				// case SDLK_KP5 :
-	       				// 	rubik->save("test");
-	       				// 	break;
-
-	       				case SDLK_r : if(state==SHOW) rubik->shuffle();
-
-	       			}
-	            	break;
-
-	        }
-	    }
-
-    	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    	if(state == RESOLVE)
-    		resolve();
-
-    	display(dt);
-
-        glFlush();
-        SDL_GL_SwapBuffers();
-    }
-
-    SDL_Quit();
+	rubik_view->animate(dt);
 }
 
 
@@ -127,19 +97,392 @@ void Resolver::run()
 
 
 
-void Resolver::display(int dt)
+void Resolver::display()
 {
+	rubik_view->display();
+
+	for(vector<Button*>::iterator it=buttons.begin(); it!=buttons.end(); ++it)
+		(*it)->display();
+
+	if(show_player)
+		displayPlayer();
+}
+
+
+
+
+void Resolver::displayPlayer()
+{
+	for(vector<Button*>::iterator it=player.begin(); it!=player.end(); ++it)
+		(*it)->display();
+
+	unsigned int nb  = rubik_view->moves_save.size();
+	unsigned int tot = rubik_view->moves.size() + nb;
+
+	float bar_cur;
+
+	if(!drag_player_cursor)
+	{
+		bar_cur = nb*player_bar_w/tot;
+		player_cursor_x = bar_cur;
+	}
+	else
+	{
+		bar_cur = player_cursor_x;
+		if(bar_cur < 0)                 bar_cur = 0;
+		else if(bar_cur > player_bar_w) bar_cur = player_bar_w;
+	}
+
 	glPushMatrix();
+	glTranslatef(width*0.25/2,height*0.12,0);
 
-	glRotatef(rotate_x,1,0,0);
-	glRotatef(rotate_y,0,1,0);
+	/* TRACÉ DE LA BARRE DE PROGRESSION (PREV) */
+	if(player_cursor_x > 0)
+	{
+		glBegin(GL_QUADS);
 
-	rubik->display(dt);
+			glColor3ub(100,100,100);
+
+			glVertex3f( 0       , 0            ,0);
+			glVertex3f( 0       , player_bar_h ,0);
+			glVertex3f( bar_cur , player_bar_h ,0);
+			glVertex3f( bar_cur , 0            ,0);
+
+		glEnd();
+	}
+
+	/* TRACÉ DE LA BARRE DE PROGRESSION (NEXT) */
+	if(bar_cur < player_bar_w)
+	{
+		glBegin(GL_QUADS);
+
+			glColor3ub(240,240,240);
+
+			glVertex3f( bar_cur      , 0            ,0);
+			glVertex3f( bar_cur      , player_bar_h ,0);
+			glVertex3f( player_bar_w , player_bar_h ,0);
+			glVertex3f( player_bar_w , 0            ,0);
+
+		glEnd();
+	}
+
+	/* TRACÉ DU CURSEUR */
+	glBegin(GL_QUADS);
+
+		if(!player_cursor_hover)
+			glColor3ub(255,255,255);
+		else
+			glColor3ub(150,150,150);
+
+		glVertex3f( bar_cur-width*0.005 , -height*0.01              , -1);
+		glVertex3f( bar_cur-width*0.005 ,  height*0.01+player_bar_h , -1);
+		glVertex3f( bar_cur+width*0.005 ,  height*0.01+player_bar_h , -1);
+		glVertex3f( bar_cur+width*0.005 , -height*0.01              , -1);
+
+	glEnd();
 
 	glPopMatrix();
 }
 
 
+
+void Resolver::gestionClickButtons(SDL_Event* event, bool click)
+{
+	if(click && move)
+	{
+		move = false;
+		return;
+	}
+
+	if(click && drag_player_cursor)
+	{
+		drag_player_cursor = false;
+		player_cursor_hover = false;
+		return;
+	}
+
+	for(vector<Button*>::iterator it=buttons.begin(); it!=buttons.end(); ++it)
+	{
+		if(event->motion.x>=(*it)->posx && event->motion.x<=(*it)->posx+(*it)->width)
+			if(event->motion.y>=height-(*it)->posy && event->motion.y<=height-(*it)->posy+(*it)->height)
+			{
+				if(click)
+					(*it)->click();
+				move = false;
+				drag_player_cursor = false;
+				return;
+			}
+	}
+
+	if(show_player)
+	{
+		/* BUTTONS PLAYER */
+		for(vector<Button*>::iterator it=player.begin(); it!=player.end(); ++it)
+		{
+			if(event->motion.x>=(*it)->posx && event->motion.x<=(*it)->posx+(*it)->width)
+				if(event->motion.y>=height-(*it)->posy && event->motion.y<=height-(*it)->posy+(*it)->height)
+				{
+					if(click)
+						(*it)->click();
+					move = false;
+					drag_player_cursor = false;
+					return;
+				}
+		}
+
+		/* CURSOR PLAYER */
+		if(!click)
+		{
+			float cursor_x = (width-player_bar_w)/2+rubik_view->moves_save.size()*player_bar_w/(rubik_view->moves_save.size()+rubik_view->moves.size());
+			float cursor_y = height*0.12;
+
+			if(event->motion.x>=cursor_x-width*0.005 && event->motion.x<=cursor_x+width*0.005)
+				if(event->motion.y>=height-cursor_y-height*0.01-player_bar_h && event->motion.y<=height-cursor_y+height*0.01)
+				{
+					drag_player_cursor = true;
+					player_cursor_hover = true;
+					pause();
+					return;
+				}
+		}
+
+	}
+
+	if(!click)
+		move = true;
+}
+
+
+
+void Resolver::gestionSurvolButtons(SDL_Event* event)
+{
+	for(vector<Button*>::iterator it=buttons.begin(); it!=buttons.end(); ++it)
+	{
+		bool hover = false;
+		if(event->motion.x>=(*it)->posx && event->motion.x<=(*it)->posx+(*it)->width)
+			if(event->motion.y>=height-(*it)->posy && event->motion.y<=height-(*it)->posy+(*it)->height)
+				hover = true;
+		(*it)->hover = hover;
+	}
+
+	if(show_player)
+	{
+		for(vector<Button*>::iterator it=player.begin(); it!=player.end(); ++it)
+		{
+			bool hover = false;
+			if(event->motion.x>=(*it)->posx && event->motion.x<=(*it)->posx+(*it)->width)
+				if(event->motion.y>=height-(*it)->posy && event->motion.y<=height-(*it)->posy+(*it)->height)
+					hover = true;
+			(*it)->hover = hover;
+		}
+
+		float cursor_x = (width-player_bar_w)/2+rubik_view->moves_save.size()*player_bar_w/(rubik_view->moves_save.size()+rubik_view->moves.size());
+		float cursor_y = height*0.12;
+		
+		bool hover = false;
+		if(event->motion.x>=cursor_x-width*0.005 && event->motion.x<=cursor_x+width*0.005)
+			if(event->motion.y>=height-cursor_y-height*0.01-player_bar_h && event->motion.y<=height-cursor_y+height*0.01)
+				hover = true;
+		player_cursor_hover = hover;
+	}
+}
+
+
+
+
+void Resolver::gestionMouseMotion(SDL_Event* event)
+{
+	if(move)
+		rubik_view->rotate(event->motion.xrel,event->motion.yrel);
+	else if(drag_player_cursor)
+	{
+		player_cursor_x += event->motion.xrel;
+
+		float bar_cur = player_cursor_x;
+
+		if(bar_cur < 0)                 bar_cur = 0;
+		else if(bar_cur > player_bar_w) bar_cur = player_bar_w;
+
+		unsigned int nb  = rubik_view->moves_save.size();
+		unsigned int tot = rubik_view->moves.size() + nb;
+		unsigned new_nb = bar_cur*tot/player_bar_w;
+		
+		if(new_nb > nb)
+			while(rubik_view->moves.size() > 0 && rubik_view->moves_save.size() < new_nb)
+			{
+				rubik_view->updateCubesPositions(rubik_view->moves.front());
+				RubikMoves tmp = rubik_view->moves.front();
+				rubik_view->moves_save.push_back(tmp);
+				rubik_view->moves.pop_front();
+			}
+		else
+			while(rubik_view->moves_save.size() > 0 && rubik_view->moves_save.size() > new_nb)
+			{
+				rubik_view->updateCubesPositions(rubik_view->getContraryMove(rubik_view->moves_save.back()));
+				RubikMoves tmp = rubik_view->moves_save.back();
+				rubik_view->moves.push_front(tmp);
+				rubik_view->moves_save.pop_back();
+			}
+	}
+    else
+    	gestionSurvolButtons(event);
+}
+
+
+
+void Resolver::gestionButton(SDL_Event* event)
+{
+	switch(event->key.keysym.sym)
+	{
+		case SDLK_ESCAPE : 
+			master->is_running = false;
+			break;
+
+		case SDLK_SPACE :
+			setResolveMode();
+			break;
+
+		case SDLK_r : 
+			shuffle();
+			break;
+	}
+}
+
+
+
+
+void Resolver::play()
+{
+	if(rubik_view->moves.size() > 0)
+	{
+		rubik_view->state = MOVE;
+		rubik_view->speed = 4;
+
+		player[PLAY]->texture = tex_pause;
+		player[PLAY]->callback = &Resolver::pause;
+	}
+}
+
+
+
+void Resolver::pause()
+{
+	switch(rubik_view->state)
+	{
+		case MOVE     :  rubik_view->state = MOVE_ONE;     break;
+		case MOVE_REV :  rubik_view->state = MOVE_REV_ONE; break;
+	}
+
+	player[PLAY]->texture = tex_play;
+	player[PLAY]->callback = &Resolver::play;
+}
+
+
+void Resolver::playFast()
+{
+	if(rubik_view->moves.size() > 0)
+	{
+		play();
+		rubik_view->speed = 6;
+	}
+}
+
+void Resolver::playFastReverse()
+{
+	if(rubik_view->moves_save.size() > 0)
+	{
+		playFast();
+		rubik_view->state = MOVE_REV;
+	}
+}
+
+void Resolver::playOne()
+{
+	if(rubik_view->moves.size() > 0)
+	{
+		play();
+
+		rubik_view->state = MOVE_ONE;
+
+		player[PLAY]->texture = tex_play;
+		player[PLAY]->callback = &Resolver::play;
+	}
+}
+
+void Resolver::playOneReverse()
+{
+	if(rubik_view->moves_save.size() > 0)
+	{
+		playOne();
+
+		rubik_view->state = MOVE_REV_ONE;
+
+		player[PLAY]->texture = tex_play;
+		player[PLAY]->callback = &Resolver::play;
+	}
+}
+
+
+void Resolver::quit()
+{
+	master->is_running = false;
+}
+
+
+
+
+void Resolver::shuffle()
+{
+	if(state == SHOW && rubik_view->state!=MOVE)
+	{
+		rubik_view->shuffle();
+		rubik_view->state = MOVE;
+		rubik_view->speed = 10;
+		show_player = false;
+	}
+}
+
+
+
+void Resolver::setResolveMode()
+{
+	if(rubik_view->state == WAIT)
+	{
+		current_step=0;
+		state=RESOLVE;
+		rubik_view->moves.clear();
+		rubik_view->moves_save.clear();
+		rubik_test->moves.clear();
+		rubik_test->moves_save.clear();
+		rubik_test->loadRubikFromOther(rubik_view);
+	}
+}
+
+
+
+void Resolver::resetRubikRotation()
+{
+	rubik_view->reinit_position = true;
+}
+
+
+void Resolver::resetRubik()
+{
+	current_step = 0;
+	state = SHOW;
+	move = false;
+	show_player = false;
+
+	delete rubik_view;
+	rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size);
+}
+
+
+
+void Resolver::createRubik()
+{
+
+}
 
 
 
@@ -208,7 +551,7 @@ vector<Cube*> Resolver::getCubes(Cube** tab, RubikColor color, TypeCube type)
 
 
 
-Cube* Resolver::getNextPosition(Cube* cube, FacesCube face, bool way, unsigned int nb_rot)
+Cube* Resolver::getNextPosition(Rubik3x3* rubik, Cube* cube, FacesCube face, bool way, unsigned int nb_rot)
 {
 	bool is_in_face = false;
 
@@ -221,7 +564,7 @@ Cube* Resolver::getNextPosition(Cube* cube, FacesCube face, bool way, unsigned i
 
 
 	if(nb_rot > 0)
-		cube = getNextPosition(cube,face,way,nb_rot-1);
+		cube = getNextPosition(rubik,cube,face,way,nb_rot-1);
 
 
 	if(face == FRONT)
@@ -360,38 +703,33 @@ Cube* Resolver::getNextPosition(Cube* cube, FacesCube face, bool way, unsigned i
 
 void Resolver::resolve()
 {
-	if(!rubik->moves.empty()) // si le rubik est en mouvement on ne fait rien
-		return;
-
 	if(current_step > NB_STEPS) // si on a terminé la résolution on change de mode
 	{
 		state = SHOW;
 		return;
 	}
 
+	if(rubik_test->moves.size() > 0)
+		rubik_test->doMovesInstant();
+
 	switch(current_step)
 	{
-		case 0 : resolveStep0(); break;
-		case 1 : resolveStep1(); break;
-		case 2 : resolveStep2(); break;
-		case 3 : resolveStep3(); break;
-		case 4 : resolveStep4(); break;
-		case 5 : resolveStep5(); break;
-		case 6 : resolveStep6(); break;
+		case 0 : resolveStep0(rubik_test); break;
+		case 1 : resolveStep1(rubik_test); break;
+		case 2 : resolveStep2(rubik_test); break;
+		case 3 : resolveStep3(rubik_test); break;
+		case 4 : resolveStep4(rubik_test); break;
+		case 5 : resolveStep5(rubik_test); break;
+		case 6 : resolveStep6(rubik_test); break;
 		
-		case NB_STEPS : cout << "Rubik's Cube résolu !" << endl; current_step++; 
-			if(is_test)
+		case NB_STEPS : 
+			state = SHOW;
+			for(int i=0; i<rubik_test->moves_save.size(); ++i)
+				rubik_view->moves.push_back(rubik_test->moves_save[i]);
+			if(rubik_view->moves.size() > 0)
 			{
-				compteur++;
-				if(compteur <= 100)
-				{
-					cout << "Nombre d'itération : " << compteur << endl;
-					rubik->shuffle();
-					rubik->shuffle();
-					rubik->shuffle();
-					state = RESOLVE;
-					current_step = 0;
-				}
+				rubik_view->movesSynthese();
+				show_player = true;
 			}
 			break;
 	}
@@ -402,10 +740,10 @@ void Resolver::resolve()
 
 
 
-void Resolver::resolveStep0()
+void Resolver::resolveStep0(Rubik3x3* rubik)
 {
 	
-	if(whiteCross())
+	if(whiteCross(rubik))
 	{
 		//cout << "Step 0 fini" << endl;
 		setNextStep();
@@ -436,19 +774,19 @@ void Resolver::resolveStep0()
 
 		if(!(center_color == edge_color))
 		{
-			if(getNextPosition(edge,BACK,false)->voisins[FRONT]->getColors()[0] == edge_color)
+			if(getNextPosition(rubik,edge,BACK,false)->voisins[FRONT]->getColors()[0] == edge_color)
 			{
-				new_edge = getNextPosition(edge,BACK,false);
+				new_edge = getNextPosition(rubik,edge,BACK,false);
 				rubik->addMove(BACK,false);
 			}
-			else if(getNextPosition(edge,BACK)->voisins[FRONT]->getColors()[0] == edge_color)
+			else if(getNextPosition(rubik,edge,BACK)->voisins[FRONT]->getColors()[0] == edge_color)
 			{
-				new_edge = getNextPosition(edge,BACK);
+				new_edge = getNextPosition(rubik,edge,BACK);
 				rubik->addMove(BACK);
 			}
 			else
 			{
-				new_edge = getNextPosition(edge,BACK,true,1);
+				new_edge = getNextPosition(rubik,edge,BACK,true,1);
 				rubik->addMove(BACK);
 				rubik->addMove(BACK);
 			}
@@ -514,12 +852,12 @@ void Resolver::resolveStep0()
 
 		while(test->voisins[BACK] != test2)
 		{	
-			test = getNextPosition(test, FRONT);
+			test = getNextPosition(rubik, test, FRONT);
 			rubik->addMove(A);
 			pile.push_back(AI);
 		}
 
-		if(getNextPosition(edge,face_edge)->voisins[FRONT] == NULL)
+		if(getNextPosition(rubik,edge,face_edge)->voisins[FRONT] == NULL)
 			rubik->addMove(face_edge);
 		else
 			rubik->addMove(face_edge,false);
@@ -602,9 +940,9 @@ void Resolver::resolveStep0()
 
 
 
-void Resolver::resolveStep1()
+void Resolver::resolveStep1(Rubik3x3* rubik)
 {
-	if(whiteCorners())
+	if(whiteCorners(rubik))
 	{
 		//cout << "Step 1 fini" << endl;
 		setNextStep();
@@ -643,7 +981,7 @@ void Resolver::resolveStep1()
 			if(!(tests[0]->getColors()[0].isIn(corner_colors,3)) || !(tests[1]->getColors()[0].isIn(corner_colors,3)))
 			{
 				rubik->addMove(BACK);
-				corner = getNextPosition(corner,BACK);
+				corner = getNextPosition(rubik,corner,BACK);
 				corner_next.rotate(BACK);
 			}
 			else
@@ -743,9 +1081,9 @@ void Resolver::resolveStep1()
 
 
 
-void Resolver::resolveStep2()
+void Resolver::resolveStep2(Rubik3x3* rubik)
 {
-	if(middleRing())
+	if(middleRing(rubik))
 	{
 		//cout << "Step 2 fini" << endl;
 		setNextStep();
@@ -787,7 +1125,7 @@ void Resolver::resolveStep2()
 		while( !(edge_save->colors[edge_face] == edge->voisins[FRONT]->getColors()[0]) )
 		{
 			rubik->addMove(P);
-			edge = getNextPosition(edge,BACK);
+			edge = getNextPosition(rubik,edge,BACK);
 			edge_virtual.rotate(P);
 		}
 
@@ -795,7 +1133,7 @@ void Resolver::resolveStep2()
 
 		FacesCube next_face;
 
-		if(edge_save->colors[BACK] == getNextPosition(edge,BACK,true)->voisins[FRONT]->getColors()[0])
+		if(edge_save->colors[BACK] == getNextPosition(rubik,edge,BACK,true)->voisins[FRONT]->getColors()[0])
 		{
 			edge_virtual.rotate(BACK);
 			next_face = edge_virtual.getFace(edge_color);
@@ -881,7 +1219,7 @@ void Resolver::resolveStep2()
 				ok = true;
 			else
 			{
-				edge = getNextPosition(edge,BACK);
+				edge = getNextPosition(rubik,edge,BACK);
 				edge_virtual.rotate(BACK);
 				edge_face = edge_virtual.getFace(edge_color);
 			}
@@ -925,9 +1263,9 @@ void Resolver::resolveStep2()
 
 
 
-void Resolver::resolveStep3()
+void Resolver::resolveStep3(Rubik3x3* rubik)
 {
-	if(yellowCross())
+	if(yellowCross(rubik))
 	{
 		//cout << "Step 3 fini" << endl;
 		setNextStep();
@@ -938,7 +1276,7 @@ void Resolver::resolveStep3()
 	FacesCube next_face;
 
 	/* COUDE JAUNE BIEN PLACÉ */
-	if(yellowBend(&face,&next_face))
+	if(yellowBend(rubik,&face,&next_face))
 	{
 		rubik->addMove(face);
 		rubik->addMove(P);
@@ -949,7 +1287,7 @@ void Resolver::resolveStep3()
 	}
 
 	/* LIGNE JAUNE BIEN PLACÉE */
-	else if(yellowLine(&face,&next_face))
+	else if(yellowLine(rubik,&face,&next_face))
 	{
 		rubik->addMove(face);
 		rubik->addMove(next_face);
@@ -975,9 +1313,9 @@ void Resolver::resolveStep3()
 
 
 
-void Resolver::resolveStep4()
+void Resolver::resolveStep4(Rubik3x3* rubik)
 {
-	if(yellowCorners())
+	if(yellowCorners(rubik))
 	{
 		//cout << "Step 4 fini" << endl;
 		setNextStep();
@@ -1052,9 +1390,9 @@ void Resolver::resolveStep4()
 
 
 
-void Resolver::resolveStep5()
+void Resolver::resolveStep5(Rubik3x3* rubik)
 {
-	if(yellowCornersCorrect())
+	if(yellowCornersCorrect(rubik))
 	{
 		//cout << "Step 5 fini" << endl;
 		setNextStep();
@@ -1065,7 +1403,7 @@ void Resolver::resolveStep5()
 	FacesCube right_face;
 	FacesCube back_face;
 
-	if(!yellowCornersDouble(&front_face,&right_face,&back_face))
+	if(!yellowCornersDouble(rubik,&front_face,&right_face,&back_face))
 	{
 		rubik->addMove(P);
 	}
@@ -1093,9 +1431,9 @@ void Resolver::resolveStep5()
 
 
 
-void Resolver::resolveStep6()
+void Resolver::resolveStep6(Rubik3x3* rubik)
 {
-	if(yellowCrossCorrect())
+	if(yellowCrossCorrect(rubik))
 	{
 		//cout << "Step 6 fini" << endl;
 		setNextStep();
@@ -1103,7 +1441,7 @@ void Resolver::resolveStep6()
 	}
 
 	FacesCube front_face, left_face, right_face;
-	bool way = getSensRotationFinal(&front_face);
+	bool way = getSensRotationFinal(rubik,&front_face);
 
 	switch(front_face)
 	{
@@ -1151,14 +1489,13 @@ void Resolver::resolveStep6()
 
 void Resolver::setNextStep()
 {
-	save.clear();
 	current_step++;
 }
 
 
 
 
-bool Resolver::whiteCross()
+bool Resolver::whiteCross(Rubik3x3* rubik)
 {
 	if(rubik->moves_set[FRONT][1]->colors[FRONT]==WHITE && rubik->moves_set[FRONT][1]->colors[TOP]==BLUE)
 		if(rubik->moves_set[FRONT][3]->colors[FRONT]==WHITE && rubik->moves_set[FRONT][3]->colors[LEFT]==ORANGE)
@@ -1171,7 +1508,7 @@ bool Resolver::whiteCross()
 
 
 
-bool Resolver::whiteCorners()
+bool Resolver::whiteCorners(Rubik3x3* rubik)
 {
 	Cube* corner;
 
@@ -1196,7 +1533,7 @@ bool Resolver::whiteCorners()
 
 
 
-bool Resolver::middleRing()
+bool Resolver::middleRing(Rubik3x3* rubik)
 {
 	Cube* corner;
 
@@ -1222,7 +1559,7 @@ bool Resolver::middleRing()
 
 
 
-bool Resolver::yellowCross()
+bool Resolver::yellowCross(Rubik3x3* rubik)
 {
 	if(rubik->moves_set[BACK][1]->colors[BACK]==YELLOW)
 		if(rubik->moves_set[BACK][3]->colors[BACK]==YELLOW)
@@ -1235,7 +1572,7 @@ bool Resolver::yellowCross()
 
 
 
-bool Resolver::yellowCorners()
+bool Resolver::yellowCorners(Rubik3x3* rubik)
 {
 	if(rubik->moves_set[BACK][0]->colors[BACK]==YELLOW)
 		if(rubik->moves_set[BACK][2]->colors[BACK]==YELLOW)
@@ -1249,7 +1586,7 @@ bool Resolver::yellowCorners()
 
 
 
-bool Resolver::yellowCornersCorrect()
+bool Resolver::yellowCornersCorrect(Rubik3x3* rubik)
 {
 	if(rubik->moves_set[BACK][0]->colors[TOP]==BLUE && rubik->moves_set[BACK][0]->colors[RIGHT]==RED)
 		if(rubik->moves_set[BACK][2]->colors[TOP]==BLUE && rubik->moves_set[BACK][2]->colors[LEFT]==ORANGE)
@@ -1262,7 +1599,7 @@ bool Resolver::yellowCornersCorrect()
 
 
 
-bool Resolver::yellowCrossCorrect()
+bool Resolver::yellowCrossCorrect(Rubik3x3* rubik)
 {
 	if(rubik->moves_set[BACK][1]->colors[TOP] == BLUE)
 		if(rubik->moves_set[BACK][3]->colors[RIGHT] == RED)
@@ -1277,7 +1614,7 @@ bool Resolver::yellowCrossCorrect()
 
 
 
-bool Resolver::yellowBend(FacesCube* face, FacesCube* next_face)
+bool Resolver::yellowBend(Rubik3x3* rubik, FacesCube* face, FacesCube* next_face)
 {
 	if(rubik->moves_set[BACK][1]->colors[BACK]==YELLOW && rubik->moves_set[BACK][3]->colors[BACK]==YELLOW)
 	{
@@ -1310,7 +1647,7 @@ bool Resolver::yellowBend(FacesCube* face, FacesCube* next_face)
 
 
 
-bool Resolver::yellowLine(FacesCube* face, FacesCube* next_face)
+bool Resolver::yellowLine(Rubik3x3* rubik, FacesCube* face, FacesCube* next_face)
 {
 	if(rubik->moves_set[BACK][1]->colors[BACK]==YELLOW && rubik->moves_set[BACK][7]->colors[BACK]==YELLOW)
 	{
@@ -1331,7 +1668,7 @@ bool Resolver::yellowLine(FacesCube* face, FacesCube* next_face)
 
 
 
-bool Resolver::yellowCornersDouble(FacesCube* front_face, FacesCube* right_face, FacesCube* back_face)
+bool Resolver::yellowCornersDouble(Rubik3x3* rubik, FacesCube* front_face, FacesCube* right_face, FacesCube* back_face)
 {
 	Cube* corner0 = rubik->moves_set[BACK][0];
 	Cube* corner2 = rubik->moves_set[BACK][2];
@@ -1414,7 +1751,7 @@ bool Resolver::yellowCornersDouble(FacesCube* front_face, FacesCube* right_face,
 
 
 
-bool Resolver::getSensRotationFinal(FacesCube* front_face)
+bool Resolver::getSensRotationFinal(Rubik3x3* rubik, FacesCube* front_face)
 {
 	Color tmp1, tmp2;
 

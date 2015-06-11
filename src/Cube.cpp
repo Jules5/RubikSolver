@@ -9,7 +9,7 @@ Cube::Cube(float x, float y, float z, float s)
 
 	nb_colors = 0;
 
-	for(int i=0; i<NB_FACES; ++i)
+	for(int i=0; i<6; ++i)
 	{
 		colors[i] = BLACK;
 		voisins[i] = NULL;
@@ -19,9 +19,19 @@ Cube::Cube(float x, float y, float z, float s)
 
 
 
+
+
 Cube::~Cube()
 {}
 
+
+
+
+void Cube::copyColors(Cube* cube)
+{
+	for(int i=0; i<6; ++i)
+		colors[i] = cube->colors[i];
+}
 
 
 
@@ -44,7 +54,7 @@ Color* Cube::getColors()
 	Color* r = new Color[nb_colors];
 
 	int i=0;
-	for(int j=0; j<NB_FACES; ++j)
+	for(int j=0; j<6; ++j)
 	{
 		if(!(colors[j]==BLACK))
 		{
@@ -79,7 +89,7 @@ void Cube::updateType()
 
 FacesCube Cube::getFace(Color c)
 {
-	for(int i=0; i<NB_FACES; ++i)
+	for(int i=0; i<6; ++i)
 		if(colors[i] == c)
 			return FacesCube(i);
 	return UNKNOW_FACE;
@@ -177,7 +187,7 @@ void Cube::rotate(FacesCube face, bool way)
 
 void Cube::switchColors(Cube* c)
 {
-	for(int i=0; i<NB_FACES; ++i)
+	for(int i=0; i<6; ++i)
 		colors[i] = c->colors[i];
 	nb_colors = c->nb_colors;
 	type = c->type;
@@ -186,7 +196,7 @@ void Cube::switchColors(Cube* c)
 
 
 
-void Cube::display(GLuint* tex)
+void Cube::display()
 {
 	glPushMatrix();
 
@@ -195,30 +205,12 @@ void Cube::display(GLuint* tex)
 	/* TRACÉ DU CUBE */
 	glBegin(GL_QUADS);
 		
-		
 		// AVANT
-		/* TRACÉ DU LOGO SI ON EST SUR LE CUBE CENTRAL BLANC */
-		// if(type==CENTER && getColors()[0]==WHITE)
-		// {
-		// 	colors[FRONT].setGlColor();
-
-		// 	glBindTexture(GL_TEXTURE_2D, *tex);
-
-		// 	glBegin(GL_QUADS);
-		// 		glTexCoord2d(0,0); glVertex3f(-size/2 , -size/2 , -size/2);
-		// 		glTexCoord2d(0,1); glVertex3f(-size/2 ,  size/2 , -size/2);
-		// 		glTexCoord2d(1,1); glVertex3f( size/2 ,  size/2 , -size/2);
-		// 		glTexCoord2d(1,0); glVertex3f( size/2 , -size/2 , -size/2);
-		// 	glEnd();
-		// }
-		// else
-		{
-			colors[FRONT].setGlColor();
-			glVertex3f(-size/2 , -size/2 , -size/2);
-			glVertex3f(-size/2 ,  size/2 , -size/2);
-			glVertex3f( size/2 ,  size/2 , -size/2);
-			glVertex3f( size/2 , -size/2 , -size/2);
-		}
+		colors[FRONT].setGlColor();
+		glVertex3f(-size/2 , -size/2 , -size/2);
+		glVertex3f(-size/2 ,  size/2 , -size/2);
+		glVertex3f( size/2 ,  size/2 , -size/2);
+		glVertex3f( size/2 , -size/2 , -size/2);
 
 		// ARRIERE
 		colors[BACK].setGlColor();

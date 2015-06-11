@@ -1,11 +1,39 @@
-#include "Resolver.h"
+#include <stdlib.h>
+#include "Master.h"
 
 
-int main()
+
+string getExecutionPath(char* argv)
 {
-	Resolver resolver;
+	string tmp;
 
-	resolver.run();
+	/* GET PATH */
+	char *real_path = realpath(argv, NULL);
+	tmp = real_path;
+	free(real_path);
+
+	/* FORMAT PATH */
+	for(unsigned int i=tmp.size(); i>=0; --i)
+		if(tmp[i] == '/')
+		{
+			tmp.erase(i,tmp.size()-1);
+			break;
+		}
+
+
+	return tmp;
+}
+
+
+
+
+int main(int argc, char* argv[])
+{
+	string path = getExecutionPath(argv[0]);
+
+	Master master(path);
+
+	master.run();
 
     return 0;
 }

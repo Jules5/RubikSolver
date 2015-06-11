@@ -2,19 +2,21 @@
 
 
 
-Rubik3x3::Rubik3x3(float s, GLuint logo, string filename)
-:size(s), id_logo(logo)
+Rubik3x3::Rubik3x3(float x, float y, float s, string filename)
+:posx(x), posy(y), size(s)
 {
 	state = WAIT;
-	mode = STANDBY;
+	reinit_position = false;
 	angle = 0;
-	moves.empty();
+	rotate_x = 30;
+	rotate_y = 45;
+	speed = 5;
+
+	moves.clear();
 
 	for(int i=0; i<NB_FACES; ++i)
 		for(int j=0; j<9; ++j)
 			moves_set[i][j] = NULL;
-
-	//moves.push_back(B);
 
 	for(int i=0; i<3; ++i)
 		for(int j=0; j<3; ++j)
@@ -37,7 +39,13 @@ Rubik3x3::Rubik3x3(float s, GLuint logo, string filename)
 
 Rubik3x3::~Rubik3x3()
 {
+	moves.clear();
+	moves_save.clear();
 
+	for(int i=0; i<3; ++i)
+		for(int j=0; j<3; ++j)
+			for(int k=0; k<3; ++k)
+				delete cubes[i][j][k];
 }
 
 
@@ -69,33 +77,35 @@ void Rubik3x3::save(string filename)
 
 void Rubik3x3::initCubes()
 {
-	cubes[0][0][0] = new Cube(-size/3 , -size/3 , -size/3 , size/3);
-	cubes[0][0][1] = new Cube( 0      , -size/3 , -size/3 , size/3);	
-	cubes[0][0][2] = new Cube( size/3 , -size/3 , -size/3 , size/3);
-	cubes[0][1][0] = new Cube(-size/3 ,  0      , -size/3 , size/3);
-	cubes[0][1][1] = new Cube( 0      ,  0      , -size/3 , size/3);
-	cubes[0][1][2] = new Cube( size/3 ,  0      , -size/3 , size/3);
-	cubes[0][2][0] = new Cube(-size/3 , size/3  , -size/3 , size/3);
-	cubes[0][2][1] = new Cube( 0      , size/3  , -size/3 , size/3);
-	cubes[0][2][2] = new Cube( size/3 , size/3  , -size/3 , size/3);
-	cubes[1][0][0] = new Cube(-size/3 , -size/3 , 0       , size/3);
-	cubes[1][0][1] = new Cube( 0      , -size/3 , 0       , size/3);
-	cubes[1][0][2] = new Cube( size/3 , -size/3 , 0       , size/3);
-	cubes[1][1][0] = new Cube(-size/3 , 0       , 0       , size/3);
-	cubes[1][1][1] = new Cube( 0      , 0       , 0       , size/3);
-	cubes[1][1][2] = new Cube( size/3 , 0       , 0       , size/3);
-	cubes[1][2][0] = new Cube(-size/3 , size/3  , 0       , size/3);
-	cubes[1][2][1] = new Cube( 0      , size/3  , 0       , size/3);
-	cubes[1][2][2] = new Cube( size/3 , size/3  , 0       , size/3);
-	cubes[2][0][0] = new Cube(-size/3 , -size/3 , size/3  , size/3);
-	cubes[2][0][1] = new Cube( 0      , -size/3 , size/3  , size/3);
-	cubes[2][0][2] = new Cube( size/3 , -size/3 , size/3  , size/3);
-	cubes[2][1][0] = new Cube(-size/3 , 0       , size/3  , size/3);
-	cubes[2][1][1] = new Cube( 0      , 0       , size/3  , size/3);
-	cubes[2][1][2] = new Cube( size/3 , 0       , size/3  , size/3);
-	cubes[2][2][0] = new Cube(-size/3 , size/3  , size/3  , size/3);
-	cubes[2][2][1] = new Cube( 0      , size/3  , size/3  , size/3);
-	cubes[2][2][2] = new Cube( size/3 , size/3  , size/3  , size/3);
+	int d = 10;
+
+	cubes[0][0][0] = new Cube(-size/3-d , -size/3-d , -size/3-d , size/3);
+	cubes[0][0][1] = new Cube( 0        , -size/3-d , -size/3-d , size/3);	
+	cubes[0][0][2] = new Cube( size/3+d , -size/3-d , -size/3-d , size/3);
+	cubes[0][1][0] = new Cube(-size/3-d ,  0        , -size/3-d , size/3);
+	cubes[0][1][1] = new Cube( 0        ,  0        , -size/3-d , size/3);
+	cubes[0][1][2] = new Cube( size/3+d ,  0        , -size/3-d , size/3);
+	cubes[0][2][0] = new Cube(-size/3-d , size/3+d  , -size/3-d , size/3);
+	cubes[0][2][1] = new Cube( 0        , size/3+d  , -size/3-d , size/3);
+	cubes[0][2][2] = new Cube( size/3+d , size/3+d  , -size/3-d , size/3);
+	cubes[1][0][0] = new Cube(-size/3-d , -size/3-d , 0       , size/3);
+	cubes[1][0][1] = new Cube( 0        , -size/3-d , 0       , size/3);
+	cubes[1][0][2] = new Cube( size/3+d , -size/3-d , 0       , size/3);
+	cubes[1][1][0] = new Cube(-size/3-d , 0         , 0       , size/3);
+	cubes[1][1][1] = new Cube( 0        , 0         , 0       , size/3);
+	cubes[1][1][2] = new Cube( size/3+d , 0         , 0       , size/3);
+	cubes[1][2][0] = new Cube(-size/3-d , size/3+d  , 0       , size/3);
+	cubes[1][2][1] = new Cube( 0        , size/3+d  , 0       , size/3);
+	cubes[1][2][2] = new Cube( size/3+d , size/3+d  , 0       , size/3);
+	cubes[2][0][0] = new Cube(-size/3-d , -size/3-d , size/3+d  , size/3);
+	cubes[2][0][1] = new Cube( 0        , -size/3-d , size/3+d  , size/3);
+	cubes[2][0][2] = new Cube( size/3+d , -size/3-d , size/3+d  , size/3);
+	cubes[2][1][0] = new Cube(-size/3-d , 0         , size/3+d  , size/3);
+	cubes[2][1][1] = new Cube( 0        , 0         , size/3+d  , size/3);
+	cubes[2][1][2] = new Cube( size/3+d , 0         , size/3+d  , size/3);
+	cubes[2][2][0] = new Cube(-size/3-d , size/3+d  , size/3+d  , size/3);
+	cubes[2][2][1] = new Cube( 0        , size/3+d  , size/3+d  , size/3);
+	cubes[2][2][2] = new Cube( size/3+d , size/3+d  , size/3+d  , size/3);
 }
 
 
@@ -313,7 +323,7 @@ void Rubik3x3::loadRubikFromFile(string filename)
 
     if(!file)  // si l'ouverture a fonctionné
     {
-        cerr << "Impossible d'ouvrir le file !" << endl;
+        cerr << "Impossible d'ouvrir le fichier !" << endl;
         loadRubikComplete();
         return;
     }
@@ -385,19 +395,44 @@ void Rubik3x3::loadRubikFromFile(string filename)
 
 
 
+void Rubik3x3::loadRubikFromOther(Rubik3x3* r)
+{
+	for(int i=0; i<3; ++i)
+		for(int j=0; j<3; ++j)
+			for(int k=0; k<3; ++k)
+				cubes[i][j][k]->copyColors(r->cubes[i][j][k]);
+}
+
+
+
 
 void Rubik3x3::shuffle()
 {
-	mode = SHUFFLE; 
+	moves.clear();
+	moves_save.clear();
 
-	srand (time(NULL));
+	srand(time(NULL));
 
 	for(int i=0; i<15; ++i)
 	{
 		int r = rand()%NB_MOVES;
-		addMove(RubikMoves(r));
+
+		if(moves.size()>0 && getContraryMove(moves.back()) == RubikMoves(r))
+			i--;
+		else
+			addMove(RubikMoves(r));
 	}
 }
+
+
+
+
+void Rubik3x3::rotate(float x, float y)
+{
+	rotate_x += y*0.4;
+	rotate_y += x*0.4;
+}
+
 
 
 
@@ -431,6 +466,19 @@ void Rubik3x3::addMove(FacesCube f, bool way)
 			case LEFT   : moves.push_back(GI); break;
 			case RIGHT  : moves.push_back(DI); break;
 		}
+}
+
+
+
+
+void Rubik3x3::doMovesInstant()
+{
+	while(moves.size() > 0)
+	{
+		updateCubesPositions(moves.front());
+		moves_save.push_back(moves.front());
+		moves.pop_front();
+	}
 }
 
 
@@ -492,77 +540,158 @@ void Rubik3x3::movesSynthese()
 
 
 
-void Rubik3x3::display(int dt)
+
+void Rubik3x3::animate(int dt)
 {
-	vector<Cube*> in_move;
+	/* POUR QUE LES VALEURS DE ROTATION SOIENT TOUJOURS ENTRE 0 ET 360 */
+	if(rotate_x<0)        rotate_x = 360.f-rotate_x;
+	else if(rotate_x>360) rotate_x = rotate_x-360.f;
+	
+	if(rotate_y<0)        rotate_y = 360.f-rotate_y;
+	else if(rotate_y>360) rotate_y = rotate_y-360.f;
 
-	if(moves.size() > 0)
+	/* MODE REINITIALISATION DE LA CAMERA */
+	if(reinit_position)
 	{
-		state = MOVE;
+		bool way = true;
+		if(rotate_x < 210 && rotate_x > 30)
+		{
+			rotate_x -= dt*0.2;
+			way = false;
+		} 
+		else 
+			rotate_x += dt*0.2;
 
-		if(moves.size() > 1)
-			movesSynthese();
+		if((way && rotate_x>=30 && rotate_x<210) || (!way && rotate_x<=30))
+			rotate_x = 30;
 
-		if(mode == RESOLVE || mode == STANDBY)
-			angle += dt/4;
-		else if(mode == SHUFFLE)
-			angle += dt;
+		way = true;
+		if(rotate_y < 225 && rotate_y > 45)
+		{
+			rotate_y -= dt*0.2;
+			way = false;
+		} 
+		else 
+			rotate_y += dt*0.2;
+
+		if((way && rotate_y>=45 && rotate_y<225) || (!way && rotate_y<=45))
+			rotate_y = 45;
+
+		if(rotate_x==30 && rotate_y==45)
+			reinit_position = false;
+	}
+	
+
+	/* GESTION MOUVEMENTS */
+	if((state == MOVE || state == MOVE_ONE) && moves.size() > 0)
+	{	
+		angle += dt*speed/10;
 
 		if(angle > 90)
 		{
 			updateCubesPositions(moves.front());
+			RubikMoves tmp = moves.front();
+			moves_save.push_back(tmp);
 			moves.pop_front();
+
 			angle = 0;
+
+			if(state == MOVE_ONE)
+				state = WAIT;
+		}
+
+		if(moves.size() <= 0)
 			state = WAIT;
-		}
-
-		if(state == MOVE)
-		{
-			glPushMatrix();
-
-			switch(moves.front())
-			{
-				case A : case PI : glRotatef(angle,0,0,-1);  break;
-				case P : case AI : glRotatef(angle,0,0,1);  break;
-				case H : case BI : glRotatef(angle,0,1,0);  break;
-				case B : case HI : glRotatef(angle,0,-1,0); break;
-				case G : case DI : glRotatef(angle,-1,0,0);  break;
-				case D : case GI : glRotatef(angle,1,0,0);  break;
-			}
-
-			for(int i=0; i<9; ++i)
-			{
-				FacesCube face;
-
-				switch(moves.front())
-				{
-					case A : case AI : face = FRONT;  break;
-					case P : case PI : face = BACK;   break;
-					case H : case HI : face = TOP;    break;
-					case B : case BI : face = BOTTOM; break;
-					case G : case GI : face = LEFT;   break;
-					case D : case DI : face = RIGHT;  break;
-				}
-
-				in_move.push_back(moves_set[face][i]); 
-				moves_set[face][i]->display(&id_logo);
-				
-			}
-
-			glPopMatrix();
-		}
 	}
-	else if(mode==SHUFFLE)
-		mode = STANDBY;
+	else if((state == MOVE_REV || state == MOVE_REV_ONE) && moves_save.size() > 0)
+	{	
+		angle -= dt*speed/10;
+
+		if(angle < -90)
+		{
+			updateCubesPositions(getContraryMove(moves_save.back()));
+			RubikMoves tmp = moves_save.back();
+			moves.push_front(tmp);
+			moves_save.pop_back();
+
+			angle = 0;
+
+			if(state == MOVE_REV_ONE)
+				state = WAIT;
+		}
+
+		if(moves_save.size() <= 0)
+			state = WAIT;
+	}
+	else
+		state = WAIT;
+	
+}
 
 
+
+
+
+void Rubik3x3::display()
+{
+	glPushMatrix();
+	
+	glTranslatef(posx,posy,0);
+
+	glRotatef(rotate_x,-1,0,0);
+	glRotatef(rotate_y,0,-1,0);
+
+	vector<Cube*> in_move;
+
+	/* AFFICHAGE DES CUBES EN ROTATION */
+	if(state != WAIT)
+	{	
+		glPushMatrix();
+
+		RubikMoves next_move = (state==MOVE || state==MOVE_ONE ? moves.front() : moves_save.back());
+
+		switch(next_move)
+		{
+			case A : case PI : glRotatef(angle,0,0,-1);  break;
+			case P : case AI : glRotatef(angle,0,0,1);  break;
+			case H : case BI : glRotatef(angle,0,1,0);  break;
+			case B : case HI : glRotatef(angle,0,-1,0); break;
+			case G : case DI : glRotatef(angle,-1,0,0);  break;
+			case D : case GI : glRotatef(angle,1,0,0);  break;
+		}
+
+		for(int i=0; i<9; ++i)
+		{
+			FacesCube face;
+
+			switch(next_move)
+			{
+				case A : case AI : face = FRONT;  break;
+				case P : case PI : face = BACK;   break;
+				case H : case HI : face = TOP;    break;
+				case B : case BI : face = BOTTOM; break;
+				case G : case GI : face = LEFT;   break;
+				case D : case DI : face = RIGHT;  break;
+			}
+
+			in_move.push_back(moves_set[face][i]); 
+			moves_set[face][i]->display();
+			
+		}
+
+		glPopMatrix();
+	}
+
+
+	/* AFFICHAGE DES AUTRES CUBES */
 	for(int i=0; i<3; ++i)
 		for(int j=0; j<3; ++j)
 			for(int k=0; k<3; ++k)
 				if(cubes[i][j][k] != NULL)
 					if(find(in_move.begin(), in_move.end(), cubes[i][j][k]) == in_move.end())
-						cubes[i][j][k]->display(&id_logo);
+						cubes[i][j][k]->display();
 
+	glPopMatrix();
 }
 
 

@@ -401,7 +401,7 @@ int main()
 	SDL_SetVideoMode(RES_X, RES_Y, 32, SDL_OPENGL);
 
 	TTF_Init();
-	font = TTF_OpenFont("fonts/Roboto-Regular.ttf", 65);
+	font = TTF_OpenFont("res/fonts/Roboto-Regular.ttf", 65);
 	if(!font)
 	{
 		cout << "Police introuvable" << endl;

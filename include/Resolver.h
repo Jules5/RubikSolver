@@ -1,5 +1,5 @@
-#ifndef MASTER_H
-#define MASTER_H
+#ifndef RESOLVER_HPP
+#define RESOLVER_HPP
 
 #include <iostream>
 #include <SDL/SDL.h>
@@ -7,10 +7,16 @@
 #include <GL/glu.h>
 
 #include "Enums.h"
+#include "Master.h"
 #include "Cube.h"
 #include "Rubik3x3.h"
+#include "Button.h"
+#include "sdlglutils.h"
 
 using namespace std;
+
+class Master;
+class Button;
 
 
 class Resolver
@@ -18,59 +24,97 @@ class Resolver
 
 	public :
 
-		bool is_test;
-		int compteur;
+		Master* master;
+
+		int width;
+		int height;
+
+		float rubik_pos_x;
+		float rubik_pos_y;
+		float rubik_size;
 
 		enum ResolverState {SHOW, RESOLVE};
 
 		ResolverState state;
 
-		float rotate_x, rotate_y;
-
 		bool move;
+		bool  drag_player_cursor;
 
-		Rubik3x3* rubik;
-
-		GLuint id_logo;
+		Rubik3x3* rubik_view;
+		Rubik3x3* rubik_test;
 
 		static const unsigned int NB_STEPS;
 		unsigned int current_step;
 
-		vector<Cube*> save;
+		vector<Button*> buttons;
+		vector<Button*> player;
 
-		Resolver();
+		bool show_player;
+		float player_bar_w;
+		float player_bar_h;
+		float player_cursor_x;
+		bool player_cursor_hover;
+
+		TTF_Font* font;
+
+		GLuint tex_play;
+		GLuint tex_pause;
+		GLuint tex_fast;
+		GLuint tex_next;
+
+		Resolver(Master* m, TTF_Font* f=NULL);
 		~Resolver();
 
-		void run();
-		void display(int dt);
+		void animate(int dt);
+		void display();
+		void displayPlayer();
+
+		void gestionClickButtons(SDL_Event*, bool click);
+		void gestionSurvolButtons(SDL_Event*);
+		void gestionMouseMotion(SDL_Event*);
+		void gestionButton(SDL_Event*);
+
+		void play();
+		void pause();
+		void playFast();
+		void playFastReverse();
+		void playOne();
+		void playOneReverse();
+		void quit();
+		void shuffle();
+		void setResolveMode();
+		void resetRubikRotation();
+		void resetRubik();
+		void createRubik();
 
 		Cube* getCube(Cube** tab, RubikColor color, TypeCube type=UNKNOW_TYPE);
 		vector<Cube*> getCubes(Cube** tab, RubikColor color, TypeCube type=UNKNOW_TYPE);
-		Cube* getNextPosition(Cube*, FacesCube, bool way=true, unsigned int nb_rot=0);
+		Cube* getNextPosition(Rubik3x3*, Cube*, FacesCube, bool way=true, unsigned int nb_rot=0);
 
 		void resolve();
-		void resolveStep0();
-		void resolveStep1();
-		void resolveStep2();
-		void resolveStep3();
-		void resolveStep4();
-		void resolveStep5();
-		void resolveStep6();
+		void resolveStep0(Rubik3x3* rubik);
+		void resolveStep1(Rubik3x3* rubik);
+		void resolveStep2(Rubik3x3* rubik);
+		void resolveStep3(Rubik3x3* rubik);
+		void resolveStep4(Rubik3x3* rubik);
+		void resolveStep5(Rubik3x3* rubik);
+		void resolveStep6(Rubik3x3* rubik);
+		void resolveStep7(Rubik3x3* rubik);
 
 		void setNextStep();
 
-		bool whiteCross();
-		bool whiteCorners();
-		bool middleRing();
-		bool yellowCross();
-		bool yellowCorners();
-		bool yellowCornersCorrect();
-		bool yellowCrossCorrect();
+		bool whiteCross(Rubik3x3* rubik);
+		bool whiteCorners(Rubik3x3* rubik);
+		bool middleRing(Rubik3x3* rubik);
+		bool yellowCross(Rubik3x3* rubik);
+		bool yellowCorners(Rubik3x3* rubik);
+		bool yellowCornersCorrect(Rubik3x3* rubik);
+		bool yellowCrossCorrect(Rubik3x3* rubik);
 		
-		bool yellowBend(FacesCube*,FacesCube*);
-		bool yellowLine(FacesCube*,FacesCube*);
-		bool yellowCornersDouble(FacesCube*,FacesCube*,FacesCube*);
-		bool getSensRotationFinal(FacesCube*);
+		bool yellowBend(Rubik3x3* rubik, FacesCube*,FacesCube*);
+		bool yellowLine(Rubik3x3* rubik, FacesCube*,FacesCube*);
+		bool yellowCornersDouble(Rubik3x3* rubik, FacesCube*,FacesCube*,FacesCube*);
+		bool getSensRotationFinal(Rubik3x3* rubik, FacesCube*);
 
 };
 

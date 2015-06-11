@@ -4,8 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <fstream>
-#include <deque>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <SDL/SDL_image.h>
 
@@ -22,21 +22,29 @@ class Rubik3x3
 
 	public :
 
-		GLuint id_logo;
-		
 		Cube* cubes[3][3][3];
+		Cube* moves_set[NB_FACES][9];
 
 		deque<RubikMoves> moves;
-		Cube* moves_set[NB_FACES][9];
+		deque<RubikMoves> moves_save;
+
+		bool reinit_position;
+
+		float posx;
+		float posy;
 
 		float size;
 
+		float speed;
+
+		float rotate_x;
+		float rotate_y;
+
 		RubikStates state;
-		RubikModes mode;
 		float angle;
 
 
-		Rubik3x3(float s=0.1, GLuint logo=0, string filename="");
+		Rubik3x3(float x=0, float y=0, float s=0.1, string filename="");
 		~Rubik3x3();
 
 		void save(string filename);
@@ -47,17 +55,24 @@ class Rubik3x3
 
 		void loadRubikComplete();
 		void loadRubikFromFile(string);
+		void loadRubikFromOther(Rubik3x3*);
 
 		void shuffle();
 
+		void rotate(float x, float y);
+
 		void addMove(RubikMoves m);
 		void addMove(FacesCube f, bool way=true);
+
+		void doMovesInstant();
 
 		RubikMoves getContraryMove(RubikMoves m);
 
 		void movesSynthese();
 
-		void display(int dt);
+		void animate(int dt);
+		void display();
+		
 		void updateCubesPositions(RubikMoves move);
 
 

@@ -2,7 +2,6 @@
 #define CUBE_H
 
 #include <iostream>
-#include <GL/glut.h>
 
 #include "Enums.h"
 #include "Color.h"
@@ -35,6 +34,7 @@ class Cube
 		Cube(float x=0, float y=0, float z=0, float s=0.1);
 		~Cube();
 
+		void copyColors(Cube*);
 		void setColor(FacesCube,Color);
 		Color* getColors();
 		void updateType();
@@ -45,7 +45,7 @@ class Cube
 		void rotate(FacesCube, bool way=true);
 		void switchColors(Cube*);
 
-		void display(GLuint* tex = NULL);
+		void display();
 
 
 		friend ostream& operator << (ostream& os, const Cube& obj);
