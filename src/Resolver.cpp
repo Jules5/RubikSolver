@@ -34,7 +34,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	tex_next  = loadTexture((master->path+"/res/tex/next.png").c_str());
 
 	/* RUBIK */
-	rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size,"saves/test.rbk");
+	rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size);
 	rubik_test = new Rubik3x3();
 
 	/* BUTTONS */
@@ -47,7 +47,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	buttons.push_back(new Button(width*0.4,height*0.95,width*0.2,height*0.05,"Initial position",font,this,&Resolver::resetRubikRotation));
 
 	buttons.push_back(new Button(width*0.08,height*0.70,width*0.16,height*0.05,"Go to editor",font,this,&Resolver::createRubik));
-	buttons.push_back(new Button(width*0.10,height*0.55,width*0.12,height*0.05,"   Load   ",font,this,&Resolver::createRubik));
+	buttons.push_back(new Button(width*0.10,height*0.55,width*0.12,height*0.05,"   Load   ",font,this,&Resolver::loadRubik));
 	buttons.push_back(new Button(width*0.10,height*0.40,width*0.12,height*0.05,"   Save   ",font,this,&Resolver::createRubik));
 
 	/* PLAYER */
@@ -61,6 +61,9 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	player_bar_h = height*0.005;
 	player_cursor_x = 0;
 	player_cursor_hover = false;
+
+	speed_rubik_normal = 1.5;
+	speed_rubik_fast   = 6;
 }
 
 
@@ -341,10 +344,6 @@ void Resolver::gestionButton(SDL_Event* event)
 		case SDLK_SPACE :
 			setResolveMode();
 			break;
-
-		case SDLK_r : 
-			shuffle();
-			break;
 	}
 }
 
@@ -356,7 +355,20 @@ void Resolver::play()
 	if(rubik_view->moves.size() > 0)
 	{
 		rubik_view->state = MOVE;
-		rubik_view->speed = 4;
+		rubik_view->speed = speed_rubik_normal;
+
+		player[PLAY]->texture = tex_pause;
+		player[PLAY]->callback = &Resolver::pause;
+	}
+}
+
+
+void Resolver::playReverse()
+{
+	if(rubik_view->moves_save.size() > 0)
+	{
+		rubik_view->state = MOVE_REV;
+		rubik_view->speed = speed_rubik_normal;
 
 		player[PLAY]->texture = tex_pause;
 		player[PLAY]->callback = &Resolver::pause;
@@ -383,7 +395,7 @@ void Resolver::playFast()
 	if(rubik_view->moves.size() > 0)
 	{
 		play();
-		rubik_view->speed = 6;
+		rubik_view->speed = speed_rubik_fast;
 	}
 }
 
@@ -391,8 +403,8 @@ void Resolver::playFastReverse()
 {
 	if(rubik_view->moves_save.size() > 0)
 	{
-		playFast();
-		rubik_view->state = MOVE_REV;
+		playReverse();
+		rubik_view->speed = speed_rubik_fast;
 	}
 }
 
@@ -401,12 +413,11 @@ void Resolver::playOne()
 	if(rubik_view->moves.size() > 0)
 	{
 		play();
-
 		rubik_view->state = MOVE_ONE;
-
-		player[PLAY]->texture = tex_play;
-		player[PLAY]->callback = &Resolver::play;
 	}
+
+	player[PLAY]->texture = tex_play;
+	player[PLAY]->callback = &Resolver::play;
 }
 
 void Resolver::playOneReverse()
@@ -414,12 +425,11 @@ void Resolver::playOneReverse()
 	if(rubik_view->moves_save.size() > 0)
 	{
 		playOne();
-
 		rubik_view->state = MOVE_REV_ONE;
-
-		player[PLAY]->texture = tex_play;
-		player[PLAY]->callback = &Resolver::play;
 	}
+
+	player[PLAY]->texture = tex_play;
+	player[PLAY]->callback = &Resolver::play;
 }
 
 
@@ -482,6 +492,19 @@ void Resolver::resetRubik()
 void Resolver::createRubik()
 {
 
+}
+
+
+
+void Resolver::loadRubik()
+{
+	string file = master->browser->getFile();
+
+	if(!file.empty())
+	{
+		delete rubik_view;
+		rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size,file);
+	}
 }
 
 

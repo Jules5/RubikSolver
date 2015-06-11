@@ -5,6 +5,7 @@
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <GL/glut.h>
 
 #include "Enums.h"
 #include "Master.h"
@@ -55,6 +56,9 @@ class Resolver
 		float player_cursor_x;
 		bool player_cursor_hover;
 
+		float speed_rubik_normal;
+		float speed_rubik_fast;
+
 		TTF_Font* font;
 
 		GLuint tex_play;
@@ -75,6 +79,7 @@ class Resolver
 		void gestionButton(SDL_Event*);
 
 		void play();
+		void playReverse();
 		void pause();
 		void playFast();
 		void playFastReverse();
@@ -86,6 +91,7 @@ class Resolver
 		void resetRubikRotation();
 		void resetRubik();
 		void createRubik();
+		void loadRubik();
 
 		Cube* getCube(Cube** tab, RubikColor color, TypeCube type=UNKNOW_TYPE);
 		vector<Cube*> getCubes(Cube** tab, RubikColor color, TypeCube type=UNKNOW_TYPE);

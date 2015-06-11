@@ -25,7 +25,7 @@ Color::Color(RubikColor c)
 			break;
 
 		case RED :
-			red   = 183;
+			red   = 255;
 			green = 18;
 			blue  = 52;
 			break;
@@ -67,6 +67,16 @@ Color::~Color()
 void Color::setGlColor()
 {
 	glColor3ub(red,green,blue);
+
+	GLfloat ambient[4]  = {(float)red/255/2, (float)green/255/2, (float)blue/255/2, 0.8f};  // COULEUR AVEC OMBRES
+	GLfloat diffuse[4]  = {(float)red/255, (float)green/255, (float)blue/255, 1.f};  // COULEUR AVEC LUMIERE NORMALE
+	GLfloat specular[4] = {0.006, 0.006, 0.006, 1.f};  // COULEUR REFLET
+	GLfloat shininess[] = { 5.0F };
+	
+	glMaterialfv(GL_FRONT, GL_AMBIENT , ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE , diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);	
 }
 
 

@@ -3,11 +3,13 @@
 
 #include <iostream>
 
+#include "Browser.h"
 #include "Resolver.h"
 #include "Editor.h"
 
 using namespace std;
 
+class Browser;
 class Resolver;
 class Editor;
 
@@ -30,8 +32,10 @@ class Master
 
 		Resolver* resolver;
 		Editor* editor;
+		Browser* browser;
 
 		TTF_Font* font;
+		TTF_Font* font_small;
 
 
 		Master(string path);

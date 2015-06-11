@@ -14,7 +14,7 @@ PATH_OBJ = obj
 OBJ_DIR = obj
 
 #Librairies
-LIB_DEP = -lGL -lGLU -lSDL -lSDL_image -lSDL_ttf
+LIB_DEP = -lGL -lGLU -lglut -lSDL -lSDL_image -lSDL_ttf
 
 #Liste fichiers .cpp et .O
 SRC = $(wildcard $(PATH_SRC)/*.cpp) 

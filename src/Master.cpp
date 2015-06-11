@@ -26,8 +26,10 @@ Master::Master(string path)
 
     /* FONT */
     TTF_Init();
-	font = TTF_OpenFont((path+"/res/fonts/Roboto-Regular.ttf").c_str(), 65);
-	if(!font)
+	font =       TTF_OpenFont((path+"/res/fonts/Roboto-Regular.ttf").c_str(), 100);
+	font_small = TTF_OpenFont((path+"/res/fonts/Roboto-Light.ttf").c_str(), 100);
+
+	if(!font || !font_small)
 	{
 		cerr << "Police introuvable" << endl;
 		exit(0);
@@ -40,14 +42,25 @@ Master::Master(string path)
     glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
+	glShadeModel(GL_SMOOTH);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
-    glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0,width,0,height,600.0f,-600.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
+	GLfloat position[] = { 0, -1, 1, 0};
+	GLfloat LightAmbient[] = { 0.5f, 0.5f, 0.5f, 1.f };
+	GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 0.6f };
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightAmbient);
 
 	/* INIT OBJECTS */
+	browser = new Browser(this,font_small,path+"/saves/");
 	resolver = new Resolver(this,font);
 }
 
@@ -114,11 +127,13 @@ void Master::run()
 
     	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glLoadIdentity();
+
 		animate(dt);
 		display();
 
-    	glFlush();
         SDL_GL_SwapBuffers();
+        glFlush();
     }
 
     SDL_Quit();

@@ -203,51 +203,81 @@ void Cube::display()
 	glTranslatef(posx,posy,posz);
 
 	/* TRACÉ DU CUBE */
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
 	glBegin(GL_QUADS);
 		
 		// AVANT
 		colors[FRONT].setGlColor();
+		glNormal3f(1,1,1);
 		glVertex3f(-size/2 , -size/2 , -size/2);
+		glNormal3f(1,-1,1);
 		glVertex3f(-size/2 ,  size/2 , -size/2);
+		glNormal3f(-1,-1,1);
 		glVertex3f( size/2 ,  size/2 , -size/2);
+		glNormal3f(-1,1,1);
 		glVertex3f( size/2 , -size/2 , -size/2);
 
 		// ARRIERE
 		colors[BACK].setGlColor();
+		glNormal3f(1,1,-1);
 		glVertex3f(-size/2 , -size/2 , size/2);
+		glNormal3f(1,-1,-1);
 		glVertex3f(-size/2 ,  size/2 , size/2);
+		glNormal3f(-1,-1,-1);
 		glVertex3f( size/2 ,  size/2 , size/2);
+		glNormal3f(-1,1,-1);
 		glVertex3f( size/2 , -size/2 , size/2);
 
 		// DESSUS
 		colors[TOP].setGlColor();
+		glNormal3f(1,-1,-1);
 		glVertex3f(-size/2 , size/2 ,  size/2);
+		glNormal3f(1,-1,1);
 		glVertex3f(-size/2 , size/2 , -size/2);
+		glNormal3f(-1,-1,1);
 		glVertex3f( size/2 , size/2 , -size/2);
+		glNormal3f(-1,-1,-1);
 		glVertex3f( size/2 , size/2 ,  size/2);
 
 		// DESSOUS
 		colors[BOTTOM].setGlColor();
+		glNormal3f(1,1,-1);
 		glVertex3f(-size/2 , -size/2 ,  size/2);
+		glNormal3f(1,1,1);
 		glVertex3f(-size/2 , -size/2 , -size/2);
+		glNormal3f(-1,1,1);
 		glVertex3f( size/2 , -size/2 , -size/2);
+		glNormal3f(-1,1,-1);
 		glVertex3f( size/2 , -size/2 ,  size/2);
 
 		// GAUCHE
 		colors[LEFT].setGlColor();
+		glNormal3f(1,1,-1);
 		glVertex3f(-size/2 , -size/2 ,  size/2);
+		glNormal3f(1,1,1);
 		glVertex3f(-size/2 , -size/2 , -size/2);
+		glNormal3f(1,-1,1);
 		glVertex3f(-size/2 ,  size/2 , -size/2);
+		glNormal3f(1,-1,-1);
 		glVertex3f(-size/2 ,  size/2 ,  size/2);
 
 		// DROITE
 		colors[RIGHT].setGlColor();
+		glNormal3f(-1,1,-1);
 		glVertex3f(size/2 , -size/2 ,  size/2);
-		glVertex3f(size/2 , -size/2 , -size/2);
-		glVertex3f(size/2 ,  size/2 , -size/2);
+		glNormal3f(-1,-1,-1);
 		glVertex3f(size/2 ,  size/2 ,  size/2);
+		glNormal3f(-1,-1,-1);
+		glVertex3f(size/2 ,  size/2 , -size/2);
+		glNormal3f(-1,1,1);
+		glVertex3f(size/2 , -size/2 , -size/2);
 	
 	glEnd();
+
+	glDisable(GL_LIGHT0);
+	glDisable(GL_LIGHTING);
 
 	/* TRACÉ DES ARÊTES */
 	glLineWidth(5);

@@ -77,7 +77,7 @@ void Rubik3x3::save(string filename)
 
 void Rubik3x3::initCubes()
 {
-	int d = 10;
+	int d = size/30;
 
 	cubes[0][0][0] = new Cube(-size/3-d , -size/3-d , -size/3-d , size/3);
 	cubes[0][0][1] = new Cube( 0        , -size/3-d , -size/3-d , size/3);	

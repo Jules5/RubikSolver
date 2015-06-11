@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <GL/glut.h>
 #include "Master.h"
 
 
@@ -29,6 +30,8 @@ string getExecutionPath(char* argv)
 
 int main(int argc, char* argv[])
 {
+	glutInit(&argc,argv);
+
 	string path = getExecutionPath(argv[0]);
 
 	Master master(path);
