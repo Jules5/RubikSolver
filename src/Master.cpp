@@ -39,7 +39,7 @@ Master::Master(string path)
     glClearColor(0.1,0.1,0.1,1.);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LINE_SMOOTH);
+ 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 

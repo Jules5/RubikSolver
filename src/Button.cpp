@@ -95,11 +95,11 @@ void Button::display()
 		glLineWidth(4);
 		glColor3ub(0,0,0);
 		
-		glVertex3f(0 ,      0      , 0);
-		glVertex3f(0 ,     -height , 0);
-		glVertex3f(width , -height , 0);
-		glVertex3f(width ,  0      , 0);
-		glVertex3f(0 ,      0      , 0);
+		glVertex3f(0 ,      0      , 1);
+		glVertex3f(0 ,     -height , 1);
+		glVertex3f(width , -height , 1);
+		glVertex3f(width ,  0      , 1);
+		glVertex3f(0 ,      0      , 1);
 
 	glEnd();
 

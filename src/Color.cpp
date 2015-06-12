@@ -25,15 +25,15 @@ Color::Color(RubikColor c)
 			break;
 
 		case RED :
-			red   = 255;
-			green = 18;
-			blue  = 52;
+			red   = 194;
+			green = 1;
+			blue  = 21;
 			break;
 
 		case BLUE :
-			red   = 0;
-			green = 70;
-			blue  = 173;
+			red   = 7;
+			green = 24;
+			blue  = 179;
 			break;
 
 		case GREEN :
@@ -68,10 +68,15 @@ void Color::setGlColor()
 {
 	glColor3ub(red,green,blue);
 
+	// GLfloat ambient[4]  = {(float)red/255*0.6, (float)green/255*0.6, (float)blue/255*0.6, 1.f};  // COULEUR AVEC OMBRES
+	// GLfloat diffuse[4]  = {(float)red/255*0.8, (float)green/255*0.8, (float)blue/255*0.8, 1.f};  // COULEUR AVEC LUMIERE NORMALE
+	// GLfloat specular[4] = {0.06, 0.06, 0.06, 1.f};  // COULEUR REFLET
+	// GLfloat shininess[] = { 5.0F };
+
 	GLfloat ambient[4]  = {(float)red/255*0.6, (float)green/255*0.6, (float)blue/255*0.6, 1.f};  // COULEUR AVEC OMBRES
-	GLfloat diffuse[4]  = {(float)red/255*1.4, (float)green/255*1.4, (float)blue/255*1.4, 1.f};  // COULEUR AVEC LUMIERE NORMALE
-	GLfloat specular[4] = {0.006, 0.006, 0.006, 1.f};  // COULEUR REFLET
-	GLfloat shininess[] = { 5.0F };
+	GLfloat diffuse[4]  = {(float)red/255*0.8, (float)green/255*0.8, (float)blue/255*0.8, 1.f};  // COULEUR AVEC LUMIERE NORMALE
+	GLfloat specular[4] = {0.6, 0.6, 0.6, 1.f};  // COULEUR REFLET
+	GLfloat shininess[] = { 120.0F };
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT , ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE , diffuse);

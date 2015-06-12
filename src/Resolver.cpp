@@ -10,13 +10,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 :master(m), font(f)
 {
 	/* INIT RESOLVER */
-	current_step = 0;
-
-	state = SHOW;
-
-	move = false;
-
-	show_player = false;
+	init();
 
 	width = master->width;
 	height = master->height;
@@ -25,7 +19,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 
 	rubik_pos_x = width*0.5;
 	rubik_pos_y = height*0.5;
-	rubik_size = (ratio>1.6 ? height*0.36 : width*0.25);
+	rubik_size = (ratio>1.6 ? height*0.40 : width*0.25);
 
 	/* INIT TEXTURES */
 	tex_play  = loadTexture((master->path+"/res/tex/play.png").c_str());
@@ -78,6 +72,16 @@ Resolver::~Resolver()
 
 	for(vector<Button*>::iterator it=player.begin(); it!=player.end(); ++it)
 		delete *it;
+}
+
+
+
+void Resolver::init()
+{
+	current_step = 0;
+	state = SHOW;
+	move = false;
+	show_player = false;
 }
 
 
@@ -498,11 +502,13 @@ void Resolver::createRubik()
 
 void Resolver::loadRubik()
 {
+	master->browser->setTitle("LOAD");
 	string file = master->browser->getFile();
 
 	if(!file.empty())
 	{
 		delete rubik_view;
+		init();
 		rubik_view = new Rubik3x3(rubik_pos_x,rubik_pos_y,rubik_size,file);
 	}
 }

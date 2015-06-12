@@ -33,9 +33,16 @@ Rubik3x3::Rubik3x3(float x, float y, float s, string filename)
 		loadRubikFromFile(filename);
 
 	/* Lumière */
-	GLfloat position[] = { 0, -1, 1, 0};
+	// GLfloat position[] = { 0, -1, 1, 0};
+	// GLfloat LightAmbient[] = { 1.0f, 1.0f, 1.0f, 1.f };
+	// GLfloat LightDiffuse[]= { 0.3f, 0.3f, 0.3f, 1.f };
+	// glLightfv(GL_LIGHT0, GL_POSITION, position);
+	// glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+	// glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+
+	GLfloat position[] = { 0, 0, 1, 1};
 	GLfloat LightAmbient[] = { 1.0f, 1.0f, 1.0f, 1.f };
-	GLfloat LightDiffuse[]= { 0.3f, 0.3f, 0.3f, 1.f };
+	GLfloat LightDiffuse[]= { 0.6f, 0.6f, 0.6f, 1.f };
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
@@ -339,20 +346,13 @@ void Rubik3x3::loadRubikFromFile(string filename)
         return;
     }
 
-
 	Color colors[54];
-
-    unsigned char red = 0;
-    unsigned char green = 0;
-    unsigned char blue = 0;
 
     for(int i=0; i<54; ++i)
     {
-    	file >> red;
-    	file >> green;
-    	file >> blue;
-
-    	colors[i] = Color(red,green,blue);
+    	unsigned char tmp;
+    	file >> tmp;
+    	colors[i] = Color(RubikColor(tmp));
     }
 
 	file.close();

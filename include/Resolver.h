@@ -69,6 +69,7 @@ class Resolver
 		Resolver(Master* m, TTF_Font* f=NULL);
 		~Resolver();
 
+		void init();
 		void animate(int dt);
 		void display();
 		void displayPlayer();

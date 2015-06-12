@@ -375,11 +375,7 @@ void saveIntoFile(Color squares[NB_COLORS][9])
        	{
        		for(int i=1; i<NB_COLORS; ++i)
        			for(int j=0; j<9; ++j)
-       			{
-       				file << squares[i][j].red;
-       				file << squares[i][j].green;
-       				file << squares[i][j].blue;
-       			}
+       				file << (unsigned char)(squares[i][j].getRubikColor());
 
        		file.close();
        	}
