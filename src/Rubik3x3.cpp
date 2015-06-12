@@ -31,6 +31,17 @@ Rubik3x3::Rubik3x3(float x, float y, float s, string filename)
 		loadRubikComplete();
 	else
 		loadRubikFromFile(filename);
+
+	/* Lumière */
+	GLfloat position[] = { 0, -1, 1, 0};
+	GLfloat LightAmbient[] = { 1.0f, 1.0f, 1.0f, 1.f };
+	GLfloat LightDiffuse[]= { 0.3f, 0.3f, 0.3f, 1.f };
+	glLightfv(GL_LIGHT0, GL_POSITION, position);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+
+	/* Texture */
+	texture_square = loadTexture("./res/tex/square.png");
 }
 
 
@@ -77,7 +88,7 @@ void Rubik3x3::save(string filename)
 
 void Rubik3x3::initCubes()
 {
-	int d = size/30;
+	int d = 0;
 
 	cubes[0][0][0] = new Cube(-size/3-d , -size/3-d , -size/3-d , size/3);
 	cubes[0][0][1] = new Cube( 0        , -size/3-d , -size/3-d , size/3);	
@@ -643,6 +654,8 @@ void Rubik3x3::display()
 
 	vector<Cube*> in_move;
 
+
+
 	/* AFFICHAGE DES CUBES EN ROTATION */
 	if(state != WAIT)
 	{	
@@ -675,7 +688,7 @@ void Rubik3x3::display()
 			}
 
 			in_move.push_back(moves_set[face][i]); 
-			moves_set[face][i]->display();
+			moves_set[face][i]->display(texture_square);
 			
 		}
 
@@ -689,7 +702,7 @@ void Rubik3x3::display()
 			for(int k=0; k<3; ++k)
 				if(cubes[i][j][k] != NULL)
 					if(find(in_move.begin(), in_move.end(), cubes[i][j][k]) == in_move.end())
-						cubes[i][j][k]->display();
+						cubes[i][j][k]->display(texture_square);
 
 	glPopMatrix();
 }

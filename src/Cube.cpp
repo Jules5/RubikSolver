@@ -196,11 +196,141 @@ void Cube::switchColors(Cube* c)
 
 
 
-void Cube::display()
+void Cube::display(GLuint tex)
 {
+	// glPushMatrix();
+
+	// glTranslatef(posx,posy,posz);
+
+	// /* TRACÉ DU CUBE */
+	// glEnable(GL_LIGHTING);
+	// glEnable(GL_LIGHT0);
+
+	// glBegin(GL_QUADS);
+		
+	// 	// AVANT
+	// 	colors[FRONT].setGlColor();
+	// 	//glNormal3f(0,0,1);
+	// 	glNormal3f( 1      ,  1      ,  1);
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// 	glNormal3f( 1      , -1      ,  1);
+	// 	glVertex3f(-size/2 ,  size/2 , -size/2);
+	// 	glNormal3f(-1      , -1      ,  1);
+	// 	glVertex3f( size/2 ,  size/2 , -size/2);
+	// 	glNormal3f(-1      ,  1      ,  1);
+	// 	glVertex3f( size/2 , -size/2 , -size/2);
+
+	// 	// ARRIERE
+	// 	colors[BACK].setGlColor();
+	// 	//glNormal3f(0,0,-1);
+	// 	glNormal3f(1,1,-1);
+	// 	glVertex3f(-size/2 , -size/2 , size/2);
+	// 	glNormal3f(1,-1,-1);
+	// 	glVertex3f(-size/2 ,  size/2 , size/2);
+	// 	glNormal3f(-1,-1,-1);
+	// 	glVertex3f( size/2 ,  size/2 , size/2);
+	// 	glNormal3f(-1,1,-1);
+	// 	glVertex3f( size/2 , -size/2 , size/2);
+
+	// 	// DESSUS
+	// 	colors[TOP].setGlColor();
+	// 	//glNormal3f(0,-1,0);
+	// 	glNormal3f(1,-1,-1);
+	// 	glVertex3f(-size/2 , size/2 ,  size/2);
+	// 	glNormal3f(1,-1,1);
+	// 	glVertex3f(-size/2 , size/2 , -size/2);
+	// 	glNormal3f(-1,-1,1);
+	// 	glVertex3f( size/2 , size/2 , -size/2);
+	// 	glNormal3f(-1,-1,-1);
+	// 	glVertex3f( size/2 , size/2 ,  size/2);
+
+	// 	// DESSOUS
+	// 	colors[BOTTOM].setGlColor();
+	// 	//glNormal3f(0,1,0);
+	// 	glNormal3f(1,1,-1);
+	// 	glVertex3f(-size/2 , -size/2 ,  size/2);
+	// 	glNormal3f(1,1,1);
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// 	glNormal3f(-1,1,1);
+	// 	glVertex3f( size/2 , -size/2 , -size/2);
+	// 	glNormal3f(-1,1,-1);
+	// 	glVertex3f( size/2 , -size/2 ,  size/2);
+
+	// 	// GAUCHE
+	// 	colors[LEFT].setGlColor();
+	// 	//glNormal3f(1,0,0);
+	// 	glNormal3f(1,1,-1);
+	// 	glVertex3f(-size/2 , -size/2 ,  size/2);
+	// 	glNormal3f(1,1,1);
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// 	glNormal3f(1,-1,1);
+	// 	glVertex3f(-size/2 ,  size/2 , -size/2);
+	// 	glNormal3f(1,-1,-1);
+	// 	glVertex3f(-size/2 ,  size/2 ,  size/2);
+
+	// 	// DROITE
+	// 	colors[RIGHT].setGlColor();
+	// 	//glNormal3f(-1,0,0);
+	// 	glNormal3f(-1,1,-1);
+	// 	glVertex3f(size/2 , -size/2 ,  size/2);
+	// 	glNormal3f(-1,-1,-1);
+	// 	glVertex3f(size/2 ,  size/2 ,  size/2);
+	// 	glNormal3f(-1,-1,1);
+	// 	glVertex3f(size/2 ,  size/2 , -size/2);
+	// 	glNormal3f(-1,1,1);
+	// 	glVertex3f(size/2 , -size/2 , -size/2);
+	
+	// glEnd();
+
+	// glDisable(GL_LIGHT0);
+	// glDisable(GL_LIGHTING);
+
+	// /* TRACÉ DES ARÊTES */
+	// glLineWidth(5);
+	// glColor3f(0.f,0.f,0.f);
+
+	// // AVANT 
+	// glBegin(GL_LINE_STRIP);
+	// 	glVertex3f(-size/2 , -size/2 , size/2);
+	// 	glVertex3f(-size/2 ,  size/2 , size/2);
+	// 	glVertex3f( size/2 ,  size/2 , size/2);
+	// 	glVertex3f( size/2 , -size/2 , size/2);
+	// 	glVertex3f(-size/2 , -size/2 , size/2);
+	// glEnd();
+
+	// // ARRIERE
+	// glBegin(GL_LINE_STRIP);
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// 	glVertex3f(-size/2 ,  size/2 , -size/2);
+	// 	glVertex3f( size/2 ,  size/2 , -size/2);
+	// 	glVertex3f( size/2 , -size/2 , -size/2);
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// glEnd();
+
+	// // AUTRES ARÊTES
+	// glBegin(GL_LINES);
+	// 	glVertex3f( size/2 ,  size/2 , -size/2);
+	// 	glVertex3f( size/2 ,  size/2 ,  size/2);
+
+	// 	glVertex3f(-size/2 ,  size/2 , -size/2);
+	// 	glVertex3f(-size/2 ,  size/2 ,  size/2);
+
+	// 	glVertex3f( size/2 , -size/2 , -size/2);
+	// 	glVertex3f( size/2 , -size/2 ,  size/2);
+
+	// 	glVertex3f(-size/2 , -size/2 , -size/2);
+	// 	glVertex3f(-size/2 , -size/2 ,  size/2);
+	// glEnd();
+
+
+	// glPopMatrix();
+
+
+
 	glPushMatrix();
 
 	glTranslatef(posx,posy,posz);
+
 
 	/* TRACÉ DU CUBE */
 	glEnable(GL_LIGHTING);
@@ -210,114 +340,206 @@ void Cube::display()
 		
 		// AVANT
 		colors[FRONT].setGlColor();
-		glNormal3f(1,1,1);
-		glVertex3f(-size/2 , -size/2 , -size/2);
-		glNormal3f(1,-1,1);
-		glVertex3f(-size/2 ,  size/2 , -size/2);
-		glNormal3f(-1,-1,1);
-		glVertex3f( size/2 ,  size/2 , -size/2);
-		glNormal3f(-1,1,1);
-		glVertex3f( size/2 , -size/2 , -size/2);
+		glNormal3f( 1      ,  1      ,  1);
+		glVertex3f(-size*0.42 , -size*0.42 , -size*0.501);
+		glNormal3f(-1      ,  1      ,  1);
+		glVertex3f( size*0.42 , -size*0.42 , -size*0.501);
+		glNormal3f(-1      , -1      ,  1);
+		glVertex3f( size*0.42 ,  size*0.42 , -size*0.501);
+		glNormal3f( 1      , -1      ,  1);
+		glVertex3f(-size*0.42 ,  size*0.42 , -size*0.501);
 
 		// ARRIERE
 		colors[BACK].setGlColor();
 		glNormal3f(1,1,-1);
-		glVertex3f(-size/2 , -size/2 , size/2);
+		glVertex3f(-size*0.42 , -size*0.42 , size*0.501);
 		glNormal3f(1,-1,-1);
-		glVertex3f(-size/2 ,  size/2 , size/2);
+		glVertex3f(-size*0.42 ,  size*0.42 , size*0.501);
 		glNormal3f(-1,-1,-1);
-		glVertex3f( size/2 ,  size/2 , size/2);
+		glVertex3f( size*0.42 ,  size*0.42 , size*0.501);
 		glNormal3f(-1,1,-1);
-		glVertex3f( size/2 , -size/2 , size/2);
+		glVertex3f( size*0.42 , -size*0.42 , size*0.501);
 
 		// DESSUS
 		colors[TOP].setGlColor();
 		glNormal3f(1,-1,-1);
-		glVertex3f(-size/2 , size/2 ,  size/2);
+		glVertex3f(-size*0.42 , size*0.501 ,  size*0.42);
 		glNormal3f(1,-1,1);
-		glVertex3f(-size/2 , size/2 , -size/2);
+		glVertex3f(-size*0.42 , size*0.501 , -size*0.42);
 		glNormal3f(-1,-1,1);
-		glVertex3f( size/2 , size/2 , -size/2);
+		glVertex3f( size*0.42 , size*0.501 , -size*0.42);
 		glNormal3f(-1,-1,-1);
-		glVertex3f( size/2 , size/2 ,  size/2);
+		glVertex3f( size*0.42 , size*0.501 ,  size*0.42);
 
 		// DESSOUS
 		colors[BOTTOM].setGlColor();
 		glNormal3f(1,1,-1);
-		glVertex3f(-size/2 , -size/2 ,  size/2);
-		glNormal3f(1,1,1);
-		glVertex3f(-size/2 , -size/2 , -size/2);
-		glNormal3f(-1,1,1);
-		glVertex3f( size/2 , -size/2 , -size/2);
+		glVertex3f(-size*0.42 , -size*0.501 ,  size*0.42);
 		glNormal3f(-1,1,-1);
-		glVertex3f( size/2 , -size/2 ,  size/2);
+		glVertex3f( size*0.42 , -size*0.501 ,  size*0.42);
+		glNormal3f(-1,1,1);
+		glVertex3f( size*0.42 , -size*0.501 , -size*0.42);
+		glNormal3f(1,1,1);
+		glVertex3f(-size*0.42 , -size*0.501 , -size*0.42);
 
 		// GAUCHE
 		colors[LEFT].setGlColor();
 		glNormal3f(1,1,-1);
-		glVertex3f(-size/2 , -size/2 ,  size/2);
+		glVertex3f(-size*0.501 , -size*0.42 ,  size*0.42);
 		glNormal3f(1,1,1);
-		glVertex3f(-size/2 , -size/2 , -size/2);
+		glVertex3f(-size*0.501, -size*0.42 , -size*0.42);
 		glNormal3f(1,-1,1);
-		glVertex3f(-size/2 ,  size/2 , -size/2);
+		glVertex3f(-size*0.501 ,  size*0.42 , -size*0.42);
 		glNormal3f(1,-1,-1);
-		glVertex3f(-size/2 ,  size/2 ,  size/2);
+		glVertex3f(-size*0.501 ,  size*0.42 ,  size*0.42);
 
 		// DROITE
 		colors[RIGHT].setGlColor();
 		glNormal3f(-1,1,-1);
-		glVertex3f(size/2 , -size/2 ,  size/2);
+		glVertex3f(size*0.501 , -size*0.42 ,  size*0.42);
 		glNormal3f(-1,-1,-1);
-		glVertex3f(size/2 ,  size/2 ,  size/2);
-		glNormal3f(-1,-1,-1);
-		glVertex3f(size/2 ,  size/2 , -size/2);
+		glVertex3f(size*0.501 ,  size*0.42 ,  size*0.42);
+		glNormal3f(-1,-1,1);
+		glVertex3f(size*0.501 ,  size*0.42 , -size*0.42);
 		glNormal3f(-1,1,1);
-		glVertex3f(size/2 , -size/2 , -size/2);
+		glVertex3f(size*0.501 , -size*0.42 , -size*0.42);
 	
 	glEnd();
 
+	Color tmp(BLACK);
+	tmp.setGlColor();
+
+	float d = 0.43;
+
+	glBegin(GL_QUADS);
+
+		// AVANT
+		glNormal3f(0,0,1);
+
+		glVertex3f(-size/2 , -size*d , -size*0.5);
+		glVertex3f( size/2 , -size*d , -size*0.5);
+		glVertex3f( size/2 ,  size*d , -size*0.5);
+		glVertex3f(-size/2 ,  size*d , -size*0.5);
+
+		glVertex3f(-size*d , -size/2 , -size*0.5);
+		glVertex3f( size*d , -size/2 , -size*0.5);
+		glVertex3f( size*d ,  size/2 , -size*0.5);
+		glVertex3f(-size*d ,  size/2 , -size*0.5);
+
+
+		// ARRIERE
+		glNormal3f(0,0,-1);
+
+		glVertex3f(-size/2 , -size*d , size/2);
+		glVertex3f(-size/2 ,  size*d , size/2);
+		glVertex3f( size/2 ,  size*d , size/2);
+		glVertex3f( size/2 , -size*d , size/2);
+
+		glVertex3f(-size*d , -size/2 , size/2);
+		glVertex3f(-size*d ,  size/2 , size/2);
+		glVertex3f( size*d ,  size/2 , size/2);
+		glVertex3f( size*d , -size/2 , size/2);
+
+
+		// DESSUS
+		glNormal3f(0,-1,0);
+
+		glVertex3f(-size*d , size/2 ,  size/2);
+		glVertex3f(-size*d , size/2 , -size/2);
+		glVertex3f( size*d , size/2 , -size/2);
+		glVertex3f( size*d , size/2 ,  size/2);
+
+		glVertex3f(-size/2 , size/2 ,  size*d);
+		glVertex3f(-size/2 , size/2 , -size*d);
+		glVertex3f( size/2 , size/2 , -size*d);
+		glVertex3f( size/2 , size/2 ,  size*d);
+
+
+		// DESSOUS
+		glNormal3f(0,1,0);
+
+		glVertex3f(-size*d , -size/2 ,  size/2);
+		glVertex3f( size*d , -size/2 ,  size/2);
+		glVertex3f( size*d , -size/2 , -size/2);
+		glVertex3f(-size*d , -size/2 , -size/2);
+
+		glVertex3f(-size/2 , -size/2 ,  size*d);
+		glVertex3f( size/2 , -size/2 ,  size*d);
+		glVertex3f( size/2 , -size/2 , -size*d);
+		glVertex3f(-size/2 , -size/2 , -size*d);
+
+
+		// GAUCHE
+		glNormal3f(1,0,0);
+
+		glVertex3f(-size/2 , -size*d ,  size/2);
+		glVertex3f(-size/2 , -size*d , -size/2);
+		glVertex3f(-size/2 ,  size*d , -size/2);
+		glVertex3f(-size/2 ,  size*d ,  size/2);
+
+		glVertex3f(-size/2 , -size/2 ,  size*d);
+		glVertex3f(-size/2 , -size/2 , -size*d);
+		glVertex3f(-size/2 ,  size/2 , -size*d);
+		glVertex3f(-size/2 ,  size/2 ,  size*d);
+
+
+		// DROITE
+		glNormal3f(-1,0,0);
+
+		glVertex3f(size/2 , -size*d ,  size/2);
+		glVertex3f(size/2 ,  size*d ,  size/2);
+		glVertex3f(size/2 ,  size*d , -size/2);
+		glVertex3f(size/2 , -size*d , -size/2);
+
+		glVertex3f(size/2 , -size/2 ,  size*d);
+		glVertex3f(size/2 ,  size/2 ,  size*d);
+		glVertex3f(size/2 ,  size/2 , -size*d);
+		glVertex3f(size/2 , -size/2 , -size*d);
+	
+	glEnd();
+
+	/* TRACÉ DES ANGLES ARRONDIS */
+	float s = 8.4;
+	d = 0.426;
+
+	glPushMatrix();
+	glTranslatef(-size*d , -size*d , -size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-size*d , -size*d ,  size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-size*d ,  size*d , -size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-size*d ,  size*d ,  size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef( size*d , -size*d , -size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef( size*d , -size*d , size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef( size*d ,  size*d , -size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef( size*d ,  size*d ,  size*d);
+	glutSolidSphere(s,10,10);
+	glPopMatrix();
+
 	glDisable(GL_LIGHT0);
 	glDisable(GL_LIGHTING);
-
-	/* TRACÉ DES ARÊTES */
-	glLineWidth(5);
-	glColor3f(0.f,0.f,0.f);
-
-	// AVANT 
-	glBegin(GL_LINE_STRIP);
-		glVertex3f(-size/2 , -size/2 , size/2);
-		glVertex3f(-size/2 ,  size/2 , size/2);
-		glVertex3f( size/2 ,  size/2 , size/2);
-		glVertex3f( size/2 , -size/2 , size/2);
-		glVertex3f(-size/2 , -size/2 , size/2);
-	glEnd();
-
-	// ARRIERE
-	glBegin(GL_LINE_STRIP);
-		glVertex3f(-size/2 , -size/2 , -size/2);
-		glVertex3f(-size/2 ,  size/2 , -size/2);
-		glVertex3f( size/2 ,  size/2 , -size/2);
-		glVertex3f( size/2 , -size/2 , -size/2);
-		glVertex3f(-size/2 , -size/2 , -size/2);
-	glEnd();
-
-	// AUTRES ARÊTES
-	glBegin(GL_LINES);
-		glVertex3f( size/2 ,  size/2 , -size/2);
-		glVertex3f( size/2 ,  size/2 ,  size/2);
-
-		glVertex3f(-size/2 ,  size/2 , -size/2);
-		glVertex3f(-size/2 ,  size/2 ,  size/2);
-
-		glVertex3f( size/2 , -size/2 , -size/2);
-		glVertex3f( size/2 , -size/2 ,  size/2);
-
-		glVertex3f(-size/2 , -size/2 , -size/2);
-		glVertex3f(-size/2 , -size/2 ,  size/2);
-	glEnd();
-
-
+	
 	glPopMatrix();
+
 }
 
 

@@ -68,11 +68,11 @@ void Color::setGlColor()
 {
 	glColor3ub(red,green,blue);
 
-	GLfloat ambient[4]  = {(float)red/255/2, (float)green/255/2, (float)blue/255/2, 0.8f};  // COULEUR AVEC OMBRES
-	GLfloat diffuse[4]  = {(float)red/255, (float)green/255, (float)blue/255, 1.f};  // COULEUR AVEC LUMIERE NORMALE
+	GLfloat ambient[4]  = {(float)red/255*0.6, (float)green/255*0.6, (float)blue/255*0.6, 1.f};  // COULEUR AVEC OMBRES
+	GLfloat diffuse[4]  = {(float)red/255*1.4, (float)green/255*1.4, (float)blue/255*1.4, 1.f};  // COULEUR AVEC LUMIERE NORMALE
 	GLfloat specular[4] = {0.006, 0.006, 0.006, 1.f};  // COULEUR REFLET
 	GLfloat shininess[] = { 5.0F };
-	
+
 	glMaterialfv(GL_FRONT, GL_AMBIENT , ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE , diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);

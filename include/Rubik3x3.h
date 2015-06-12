@@ -43,6 +43,8 @@ class Rubik3x3
 		RubikStates state;
 		float angle;
 
+		GLuint texture_square;
+
 
 		Rubik3x3(float x=0, float y=0, float s=0.1, string filename="");
 		~Rubik3x3();

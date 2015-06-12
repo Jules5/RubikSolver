@@ -41,6 +41,7 @@ Master::Master(string path)
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
 
 	glShadeModel(GL_SMOOTH);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -51,13 +52,6 @@ Master::Master(string path)
 	glOrtho(0,width,0,height,600.0f,-600.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
-	GLfloat position[] = { 0, -1, 1, 0};
-	GLfloat LightAmbient[] = { 0.5f, 0.5f, 0.5f, 1.f };
-	GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 0.6f };
-	glLightfv(GL_LIGHT0, GL_POSITION, position);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightAmbient);
 
 	/* INIT OBJECTS */
 	browser = new Browser(this,font_small,path+"/saves/");

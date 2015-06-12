@@ -45,7 +45,7 @@ class Cube
 		void rotate(FacesCube, bool way=true);
 		void switchColors(Cube*);
 
-		void display();
+		void display(GLuint tex);
 
 
 		friend ostream& operator << (ostream& os, const Cube& obj);
