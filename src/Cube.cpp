@@ -214,73 +214,49 @@ void Cube::display(GLuint tex)
 		// AVANT
 		colors[FRONT].setGlColor();
 		glNormal3f( 0, 0, 1);
-		//glNormal3f( 1      ,  1      ,  1);
 		glVertex3f(-size*d , -size*d , -size*0.501);
-		//glNormal3f(-1      ,  1      ,  1);
 		glVertex3f( size*d , -size*d , -size*0.501);
-		//glNormal3f(-1      , -1      ,  1);
 		glVertex3f( size*d ,  size*d , -size*0.501);
-		//glNormal3f( 1      , -1      ,  1);
 		glVertex3f(-size*d ,  size*d , -size*0.501);
 
 		// ARRIERE
 		colors[BACK].setGlColor();
 		glNormal3f( 0, 0, -1);
-		//glNormal3f(1,1,-1);
 		glVertex3f(-size*d , -size*d , size*0.501);
-		//glNormal3f(1,-1,-1);
 		glVertex3f(-size*d ,  size*d , size*0.501);
-		//glNormal3f(-1,-1,-1);
 		glVertex3f( size*d ,  size*d , size*0.501);
-		//glNormal3f(-1,1,-1);
 		glVertex3f( size*d , -size*d , size*0.501);
 
 		// DESSUS
 		colors[TOP].setGlColor();
 		glNormal3f( 0, -1, 0);
-		//glNormal3f(1,-1,-1);
 		glVertex3f(-size*d , size*0.501 ,  size*d);
-		//glNormal3f(1,-1,1);
 		glVertex3f(-size*d , size*0.501 , -size*d);
-		//glNormal3f(-1,-1,1);
 		glVertex3f( size*d , size*0.501 , -size*d);
-		//glNormal3f(-1,-1,-1);
 		glVertex3f( size*d , size*0.501 ,  size*d);
 
 		// DESSOUS
 		colors[BOTTOM].setGlColor();
 		glNormal3f( 0, 1, 0);
-		//glNormal3f(1,1,-1);
 		glVertex3f(-size*d , -size*0.501 ,  size*d);
-		//glNormal3f(-1,1,-1);
 		glVertex3f( size*d , -size*0.501 ,  size*d);
-		//glNormal3f(-1,1,1);
 		glVertex3f( size*d , -size*0.501 , -size*d);
-		//glNormal3f(1,1,1);
 		glVertex3f(-size*d , -size*0.501 , -size*d);
 
 		// GAUCHE
 		colors[LEFT].setGlColor();
 		glNormal3f( 1, 0, 0);
-		//glNormal3f(1,1,-1);
 		glVertex3f(-size*0.501 , -size*d ,  size*d);
-		//glNormal3f(1,1,1);
 		glVertex3f(-size*0.501 , -size*d , -size*d);
-		//glNormal3f(1,-1,1);
 		glVertex3f(-size*0.501 ,  size*d , -size*d);
-		//glNormal3f(1,-1,-1);
 		glVertex3f(-size*0.501 ,  size*d ,  size*d);
 
 		// DROITE
 		colors[RIGHT].setGlColor();
 		glNormal3f( -1, 0, 0);
-		//glNormal3f(-1,1,-1);
 		glVertex3f(size*0.501 , -size*d ,  size*d);
-		//glNormal3f(-1,-1,-1);
 		glVertex3f(size*0.501 ,  size*d ,  size*d);
-		//glNormal3f(-1,-1,1);
 		glVertex3f(size*0.501 ,  size*d , -size*d);
-		//glNormal3f(-1,1,1);
 		glVertex3f(size*0.501 , -size*d , -size*d);
 	
 	glEnd();
@@ -290,7 +266,7 @@ void Cube::display(GLuint tex)
 	GLfloat ambient[4]  = {0, 0, 0, 1.f};  // COULEUR AVEC OMBRES
 	GLfloat diffuse[4]  = {0, 0, 0, 1.f};  // COULEUR AVEC LUMIERE NORMALE
 	GLfloat specular[4] = {0, 0, 0, 1.f};  // COULEUR REFLET
-	GLfloat shininess[] = { 128.0F };
+	GLfloat shininess[] = { .0F };
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT , ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE , diffuse);

@@ -5,6 +5,7 @@
 Browser::Browser(Master* m, TTF_Font* font, string path)
 :master(m), font(font), path(path)
 {
+	run = false;
 	cursor = 0;
 	width  = master->width*0.5;
 	height = master->height*0.7;
@@ -16,6 +17,9 @@ Browser::Browser(Master* m, TTF_Font* font, string path)
 	file_height = (height-title_height)/nb_row;
 	file_margin_left = width*0.05;
 	elevator_width = width*0.05;
+	create_file = false;
+	creator_height = file_height;
+	saisie_texture = 0;
 }
 
 
@@ -158,6 +162,51 @@ void Browser::display()
 		glEnd();
 	}
 
+	/* ZONE DE SAISIE */
+	if(create_file)
+	{
+		glBegin(GL_QUADS);
+			glColor3ub(255,255,255);
+			glVertex3f(0     , -creator_height , 2);
+			glVertex3f(0     , 0                   , 2);
+			glVertex3f(width , 0                   , 2);
+			glVertex3f(width , -creator_height , 2);
+		glEnd();
+
+		glLineWidth(3);
+		glBegin(GL_LINES);
+			glColor3ub(0,0,0);
+			glVertex3f(0     , 0 , 20);
+			glVertex3f(width , 0 , 20);
+		glEnd();
+
+		if(saisie_texture != 0)
+		{
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, saisie_texture);
+
+			float tex_w = 1;
+			float bar_w = saisie_width;
+			bar_w = bar_w;
+
+			if(bar_w > width*0.96)
+			{
+				tex_w = width*0.96/bar_w;
+				bar_w = width*0.96;
+			}
+
+			glBegin(GL_QUADS);
+				glColor3ub(255,255,255);
+				glTexCoord2d(0    , 0); glVertex3f( width*0.02       , 0               , 0);
+				glTexCoord2d(0    , 1); glVertex3f( width*0.02       , -creator_height , 0);
+				glTexCoord2d(tex_w, 1); glVertex3f( width*0.02+bar_w , -creator_height , 0);
+				glTexCoord2d(tex_w, 0); glVertex3f( width*0.02+bar_w ,  0              , 0);
+			glEnd();
+
+			glDisable(GL_TEXTURE_2D);
+		}
+	}
+
 
 	glPopMatrix();
 }
@@ -211,14 +260,26 @@ void Browser::sortFiles()
 
 
 
-string Browser::getFile()
+string Browser::getFile(bool create)
 {
 	glDisable(GL_DEPTH_TEST);
 
 	string str = "";
+	string saisie = "";
 	updateFiles();
+
+	create_file = create;
+
+	if(create_file) 
+		buildTextureSaisie(saisie);
+
+	int unicode;
 	SDL_Event event;
-	bool run = true;
+	run = true;
+
+
+	SDL_EnableUNICODE(1);
+
 
 	while(run && str=="")
     {
@@ -229,24 +290,33 @@ string Browser::getFile()
 	        	case SDL_KEYUP :
 		        	switch(event.key.keysym.sym)
 					{
-						case SDLK_ESCAPE : 
-							run = false;
-							break;
+						case SDLK_ESCAPE : run = false; break;
 
-						case SDLK_KP_PLUS :
-							nb_row++;
-							break;
-
-						case SDLK_KP_MINUS :
-							nb_row--;
+						case SDLK_RETURN : 
+							str = path+saisie; 
+							if(str.substr(str.size()-4,4) != ".rbk")
+								str += ".rbk";
 							break;
 					}
 					break;
 
-				case SDL_MOUSEMOTION     : gestionHover(&event); break;
-				case SDL_MOUSEBUTTONDOWN : gestionWheel(&event); break;
-				case SDL_MOUSEBUTTONUP   : str = gestionClick(&event); break;
+				case SDL_KEYDOWN :
+					unicode = event.key.keysym.unicode;
+					if(unicode == 8 && saisie.size()>0)
+					{
+						saisie.erase(saisie.size()-1);
+						buildTextureSaisie(saisie);
+					}
+					else if(unicode >= 32 && unicode <= 127)
+					{
+						saisie += (char)unicode;
+						buildTextureSaisie(saisie);
+					}
+					break;
 
+				case SDL_MOUSEMOTION     : gestionHover(&event); break;
+				case SDL_MOUSEBUTTONDOWN : if(files.size()>nb_row) gestionWheel(&event); break;
+				case SDL_MOUSEBUTTONUP   : str = gestionClick(&event); break;
 	        }
 	    }
 
@@ -258,7 +328,42 @@ string Browser::getFile()
 
     glEnable(GL_DEPTH_TEST);
 
+
+    SDL_EnableUNICODE(0);
+
+
 	return str;
+}
+
+
+
+void Browser::detectChar(SDL_Event* event, string* filename)
+{
+	int code = event->key.keysym.sym;
+	
+	if(code >= SDLK_KP0 && code <= SDLK_KP9) // CHIFFRES (PAVÉ NUM)
+		*filename = *filename + char(event->key.keysym.sym-208);
+
+	else if(code >= SDLK_0 && code <= SDLK_9) // CHIFFRES
+		*filename = *filename + char(event->key.keysym.sym);
+
+	else if(code >= SDLK_a && code <= SDLK_z) // LETTRES
+	{
+		char tmp = 0;
+		if(event->key.keysym.mod & KMOD_CAPS || event->key.keysym.mod & KMOD_SHIFT)
+			tmp = 32;
+		*filename = *filename + char(char(event->key.keysym.sym)-tmp);
+	}
+
+	else if(code == SDLK_MINUS) // MOINS -
+		*filename = *filename + '-';
+
+	else if(code == SDLK_UNDERSCORE) // UNDERSCORE _
+		*filename = *filename + '_';
+
+	else if(code == SDLK_BACKSPACE) // EFFACER
+		if(filename->length()>0)
+			filename->erase(filename->length()-1);
 }
 
 
@@ -289,6 +394,32 @@ void Browser::buildTextures()
 	
 		textures_width.push_back(file_height*surface->w/surface->h);
 	}
+}
+
+
+
+void Browser::buildTextureSaisie(string saisie)
+{
+	glDeleteTextures(1,&saisie_texture);
+
+	if(saisie.empty())
+	{
+		saisie_texture = 0;
+		return;
+	}
+
+	SDL_Color Color = {0, 0, 0};
+	SDL_Surface* surface = TTF_RenderText_Blended(font,saisie.c_str(),Color);
+	
+	glGenTextures(1, &saisie_texture);
+	glBindTexture(GL_TEXTURE_2D, saisie_texture);
+ 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, surface->pixels);
+
+	saisie_width = file_height*surface->w/surface->h;
 }
 
 
@@ -346,6 +477,22 @@ void Browser::gestionWheel(SDL_Event* event)
 
 string Browser::gestionClick(SDL_Event* event)
 {
+	if(!create_file
+	&& (event->motion.x < x || event->motion.x > x+width
+	|| event->motion.y < y || event->motion.y > y+height))
+	{
+		run = false;
+		return "";
+	}
+
+	else if(create_file
+	&& (event->motion.x < x || event->motion.x > x+width
+	|| event->motion.y < y || event->motion.y > y+height+creator_height))
+	{
+		run = false;
+		return "";
+	}
+
 	if(event->button.button == SDL_BUTTON_LEFT)
 		for(unsigned int i=0; i<files_hover.size(); ++i)
 			if(files_hover[i])

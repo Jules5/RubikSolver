@@ -40,9 +40,9 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	
 	buttons.push_back(new Button(width*0.4,height*0.95,width*0.2,height*0.05,"Initial position",font,this,&Resolver::resetRubikRotation));
 
-	buttons.push_back(new Button(width*0.08,height*0.70,width*0.16,height*0.05,"Go to editor",font,this,&Resolver::createRubik));
+	buttons.push_back(new Button(width*0.08,height*0.70,width*0.16,height*0.05,"Go to editor",font,this,&Resolver::switchToEditor));
 	buttons.push_back(new Button(width*0.10,height*0.55,width*0.12,height*0.05,"   Load   ",font,this,&Resolver::loadRubik));
-	buttons.push_back(new Button(width*0.10,height*0.40,width*0.12,height*0.05,"   Save   ",font,this,&Resolver::createRubik));
+	buttons.push_back(new Button(width*0.10,height*0.40,width*0.12,height*0.05,"   Save   ",font,this,&Resolver::saveRubik));
 
 	/* PLAYER */
 	player.push_back(new Button(width*0.5-(height*0.245),height*0.08,height*0.05,height*0.05,tex_fast,true,this,&Resolver::playFastReverse));
@@ -56,7 +56,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	player_cursor_x = 0;
 	player_cursor_hover = false;
 
-	speed_rubik_normal = 1.5;
+	speed_rubik_normal = 4;
 	speed_rubik_fast   = 6;
 }
 
@@ -193,6 +193,21 @@ void Resolver::displayPlayer()
 
 
 
+
+void Resolver::gestionEvents(SDL_Event* event)
+{
+	switch(event->type)
+	{
+		case SDL_MOUSEBUTTONDOWN : gestionClickButtons(event,false); break;
+        case SDL_MOUSEBUTTONUP   : gestionClickButtons(event,true); break;
+        case SDL_MOUSEMOTION     : gestionMouseMotion(event); break;
+        case SDL_KEYUP           : gestionButton(event); break;
+    }
+}
+
+
+
+
 void Resolver::gestionClickButtons(SDL_Event* event, bool click)
 {
 	if(click && move)
@@ -262,7 +277,7 @@ void Resolver::gestionClickButtons(SDL_Event* event, bool click)
 
 
 void Resolver::gestionSurvolButtons(SDL_Event* event)
-{
+{//cout << event->motion.x << endl;
 	for(vector<Button*>::iterator it=buttons.begin(); it!=buttons.end(); ++it)
 	{
 		bool hover = false;
@@ -362,7 +377,7 @@ void Resolver::play()
 		rubik_view->speed = speed_rubik_normal;
 
 		player[PLAY]->texture = tex_pause;
-		player[PLAY]->callback = &Resolver::pause;
+		player[PLAY]->callback_resolver = &Resolver::pause;
 	}
 }
 
@@ -375,7 +390,7 @@ void Resolver::playReverse()
 		rubik_view->speed = speed_rubik_normal;
 
 		player[PLAY]->texture = tex_pause;
-		player[PLAY]->callback = &Resolver::pause;
+		player[PLAY]->callback_resolver = &Resolver::pause;
 	}
 }
 
@@ -390,7 +405,7 @@ void Resolver::pause()
 	}
 
 	player[PLAY]->texture = tex_play;
-	player[PLAY]->callback = &Resolver::play;
+	player[PLAY]->callback_resolver = &Resolver::play;
 }
 
 
@@ -421,7 +436,7 @@ void Resolver::playOne()
 	}
 
 	player[PLAY]->texture = tex_play;
-	player[PLAY]->callback = &Resolver::play;
+	player[PLAY]->callback_resolver = &Resolver::play;
 }
 
 void Resolver::playOneReverse()
@@ -433,7 +448,7 @@ void Resolver::playOneReverse()
 	}
 
 	player[PLAY]->texture = tex_play;
-	player[PLAY]->callback = &Resolver::play;
+	player[PLAY]->callback_resolver = &Resolver::play;
 }
 
 
@@ -493,11 +508,20 @@ void Resolver::resetRubik()
 
 
 
-void Resolver::createRubik()
+void Resolver::switchToEditor()
 {
-
+	master->switchMode();
 }
 
+
+void Resolver::saveRubik()
+{
+	master->browser->setTitle("SAVE");
+	string file = master->browser->getFile(true);
+	
+	if(!file.empty())
+		rubik_view->saveIntoFile(file);
+}
 
 
 void Resolver::loadRubik()

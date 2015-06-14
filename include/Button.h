@@ -8,10 +8,12 @@
 #include <SDL/SDL_ttf.h>
 
 #include "Resolver.h"
+#include "Editor.h"
 
 using namespace std;
 
 class Resolver;
+class Editor;
 
 class Button 
 {
@@ -19,10 +21,13 @@ class Button
 	public :
 
 		enum ContentButton{TEXT, IMAGE};
+		enum TypeButton{RESOLVER_BUTTON, EDITOR_BUTTON};
 
 		ContentButton content;
+		TypeButton type;
 
 		Resolver* resolver;
+		Editor* editor;
 
 		float posx;
 		float posy;
@@ -37,11 +42,16 @@ class Button
 
 		bool hover;
 
-		void (Resolver::*callback)();
+		void (Resolver::*callback_resolver)();
+		void (Editor::*callback_editor)();
 
 
 		Button(float x, float y, float w, float h, string t, TTF_Font* font, Resolver* r=NULL, void (Resolver::*pf)()=NULL);
 		Button(float x, float y, float w, float h, GLuint tex, bool invert=false, Resolver* r=NULL, void (Resolver::*pf)()=NULL);
+		
+		Button(float x, float y, float w, float h, string t, TTF_Font* font, Editor* r=NULL, void (Editor::*pf)()=NULL);
+		Button(float x, float y, float w, float h, GLuint tex, bool invert=false, Editor* r=NULL, void (Editor::*pf)()=NULL);
+		
 		~Button();
 
 		void display();

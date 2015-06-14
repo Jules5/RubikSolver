@@ -9,7 +9,7 @@ Master::Master(string path)
 	mode = RESOLVER;
 
 	resolver = NULL;
-	editor = NULL;
+	editor   = NULL;
 
 	/* INIT SDL */
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -18,7 +18,7 @@ Master::Master(string path)
 
 	width  = screen->current_w;
 	height = screen->current_h;
-	int ratio = width/height;
+	float ratio = (float)width/(float)height;
 
 	SDL_Init(SDL_INIT_VIDEO);
     SDL_WM_SetCaption("RubikSolver",NULL);
@@ -54,8 +54,9 @@ Master::Master(string path)
 	glLoadIdentity();
 
 	/* INIT OBJECTS */
-	browser = new Browser(this,font_small,path+"/saves/");
+	browser  = new Browser(this,font_small,path+"/saves/");
 	resolver = new Resolver(this,font);
+	editor   = new Editor(this,font);
 }
 
 
@@ -63,8 +64,11 @@ Master::Master(string path)
 
 Master::~Master()
 {
-	if(resolver != NULL) delete resolver;
-	if(editor != NULL)   delete editor;
+	switch(mode)
+	{
+		case RESOLVER : delete resolver; break;
+		case EDITOR   : delete editor;    break;
+	}
 
 	TTF_CloseFont(font);
 	TTF_Quit();
@@ -91,31 +95,18 @@ void Master::run()
 
 	    while(SDL_PollEvent(&event))
 	    {
-	        switch(event.type)
+	    	switch(event.type)
 	        {
 	            case SDL_QUIT :
 	                is_running = false;
 	                break;
 
-	            case SDL_MOUSEBUTTONDOWN :
+	            default : 
 	            	if(mode == RESOLVER)
-	            		resolver->gestionClickButtons(&event,false);
-	            	break;
-
-	            case SDL_MOUSEBUTTONUP :
-	            	if(mode == RESOLVER)
-	            		resolver->gestionClickButtons(&event,true);
-	            	break;
-
-	            case SDL_MOUSEMOTION :
-	            	if(mode == RESOLVER)
-	            		resolver->gestionMouseMotion(&event);
-	            	break;
-
-	            case SDL_KEYUP :
-	            	if(mode == RESOLVER)
-	            		resolver->gestionButton(&event);
-	            	break;
+	             		resolver->gestionEvents(&event);
+	             	else if(mode == EDITOR)
+	             		editor->gestionEvents(&event);
+	          	break;
 	        }
 	    }
 
@@ -150,4 +141,17 @@ void Master::display()
 {
 	if(mode == RESOLVER)
     	resolver->display();
+    else if(mode == EDITOR)
+    	editor->display();
+}
+
+
+
+void Master::switchMode()
+{
+	switch(mode)
+	{
+		case RESOLVER : mode = EDITOR;   break;
+		case EDITOR   : mode = RESOLVER; break;
+	}
 }

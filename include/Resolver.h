@@ -74,6 +74,9 @@ class Resolver
 		void display();
 		void displayPlayer();
 
+		void switchToEditor();
+
+		void gestionEvents(SDL_Event* event);
 		void gestionClickButtons(SDL_Event*, bool click);
 		void gestionSurvolButtons(SDL_Event*);
 		void gestionMouseMotion(SDL_Event*);
@@ -92,6 +95,7 @@ class Resolver
 		void resetRubikRotation();
 		void resetRubik();
 		void createRubik();
+		void saveRubik();
 		void loadRubik();
 
 		Cube* getCube(Cube** tab, RubikColor color, TypeCube type=UNKNOW_TYPE);

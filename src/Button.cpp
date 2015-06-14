@@ -3,11 +3,12 @@
 
 
 Button::Button(float x, float y, float w, float h, string t, TTF_Font* font, Resolver* r, void (Resolver::*pf)())
-:posx(x), posy(y), width(w), height(h), text(t), resolver(r), callback(pf)
+:posx(x), posy(y), width(w), height(h), text(t), resolver(r), callback_resolver(pf)
 {
 	hover = false;
 	invert_texture = false;
 	content = TEXT;
+	type = RESOLVER_BUTTON;
 
 	/* CALCUL DE LA TEXTURE DU BUTTON */
 	SDL_Color Color = {0, 0, 0};
@@ -27,11 +28,48 @@ Button::Button(float x, float y, float w, float h, string t, TTF_Font* font, Res
 
 
 Button::Button(float x, float y, float w, float h, GLuint tex, bool invert, Resolver* r, void (Resolver::*pf)())
-:posx(x), posy(y), width(w), height(h), texture(tex), invert_texture(invert), resolver(r), callback(pf)
+:posx(x), posy(y), width(w), height(h), texture(tex), invert_texture(invert), resolver(r), callback_resolver(pf)
 {
 	hover = false;
 	content = IMAGE;
+	type = RESOLVER_BUTTON;
 }
+
+
+
+Button::Button(float x, float y, float w, float h, string t, TTF_Font* font, Editor* r, void (Editor::*pf)())
+:posx(x), posy(y), width(w), height(h), text(t), editor(r), callback_editor(pf)
+{
+	hover = false;
+	invert_texture = false;
+	content = TEXT;
+	type = EDITOR_BUTTON;
+
+	/* CALCUL DE LA TEXTURE DU BUTTON */
+	SDL_Color Color = {0, 0, 0};
+	SDL_Surface* surface = TTF_RenderText_Blended(font,(text).c_str(),Color);
+	texture = 0;
+	
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+ 
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_BGRA,GL_UNSIGNED_BYTE, surface->pixels);
+}
+
+
+
+
+Button::Button(float x, float y, float w, float h, GLuint tex, bool invert, Editor* r, void (Editor::*pf)())
+:posx(x), posy(y), width(w), height(h), texture(tex), invert_texture(invert), editor(r), callback_editor(pf)
+{
+	hover = false;
+	content = IMAGE;
+	type = EDITOR_BUTTON;
+}
+
 
 
 Button::~Button()
@@ -44,6 +82,8 @@ Button::~Button()
 
 void Button::display()
 {
+	glDisable(GL_DEPTH_TEST);
+
 	glPushMatrix();
 
 	glTranslatef(posx,posy,0);
@@ -56,10 +96,10 @@ void Button::display()
 		else
 			glColor3ub(240,240,240);
 
-		glVertex3f( 0     ,  0      ,0);
-		glVertex3f( 0     , -height ,0);
-		glVertex3f( width , -height ,0);
-		glVertex3f( width ,  0      ,0);
+		glVertex2f( 0     ,  0     );
+		glVertex2f( 0     , -height);
+		glVertex2f( width , -height);
+		glVertex2f( width ,  0     );
 
 	glEnd();
 
@@ -73,39 +113,41 @@ void Button::display()
 
 		if(!invert_texture)
 		{
-			glTexCoord2d(0, 1); glVertex3f( width*dx     , -height*(1-dy) ,-1);
-			glTexCoord2d(0, 0); glVertex3f( width*dx     , -height*dy     ,-1);
-			glTexCoord2d(1, 0); glVertex3f( width*(1-dx) , -height*dy     ,-1);
-			glTexCoord2d(1, 1); glVertex3f( width*(1-dx) , -height*(1-dy) ,-1);
+			glTexCoord2d(0, 1); glVertex2f( width*dx     , -height*(1-dy));
+			glTexCoord2d(0, 0); glVertex2f( width*dx     , -height*dy    );
+			glTexCoord2d(1, 0); glVertex2f( width*(1-dx) , -height*dy    );
+			glTexCoord2d(1, 1); glVertex2f( width*(1-dx) , -height*(1-dy));
 		}
 		else
 		{
-			glTexCoord2d(1, 1); glVertex3f( width*dx     , -height*(1-dy) ,-1);
-			glTexCoord2d(1, 0); glVertex3f( width*dx     , -height*dy     ,-1);
-			glTexCoord2d(0, 0); glVertex3f( width*(1-dx) , -height*dy     ,-1);
-			glTexCoord2d(0, 1); glVertex3f( width*(1-dx) , -height*(1-dy) ,-1);
+			glTexCoord2d(1, 1); glVertex2f( width*dx     , -height*(1-dy));
+			glTexCoord2d(1, 0); glVertex2f( width*dx     , -height*dy    );
+			glTexCoord2d(0, 0); glVertex2f( width*(1-dx) , -height*dy    );
+			glTexCoord2d(0, 1); glVertex2f( width*(1-dx) , -height*(1-dy));
 		}
 
 	glEnd();
 	glDisable(GL_TEXTURE_2D);
 
 	// CONTOUR 
+	glLineWidth(4);
 	glBegin(GL_LINE_STRIP);
 		
-		glLineWidth(4);
 		glColor3ub(0,0,0);
 		
-		glVertex3f(0 ,      0      , 1);
-		glVertex3f(0 ,     -height , 1);
-		glVertex3f(width , -height , 1);
-		glVertex3f(width ,  0      , 1);
-		glVertex3f(0 ,      0      , 1);
+		glVertex2f(0 ,      0     );
+		glVertex2f(0 ,     -height);
+		glVertex2f(width , -height);
+		glVertex2f(width ,  0     );
+		glVertex2f(0 ,      0     );
 
 	glEnd();
 
 
 	
 	glPopMatrix();
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -115,5 +157,9 @@ void Button::display()
 
 void Button::click()
 {
-	(resolver->*callback)();
+	switch(type)
+	{
+		case RESOLVER_BUTTON : (resolver->*callback_resolver)(); break;
+		case EDITOR_BUTTON   : (editor->*callback_editor)();   break;
+	}
 }

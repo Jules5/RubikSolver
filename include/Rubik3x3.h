@@ -59,6 +59,8 @@ class Rubik3x3
 		void loadRubikFromFile(string);
 		void loadRubikFromOther(Rubik3x3*);
 
+		void saveIntoFile(string filename);
+
 		void shuffle();
 
 		void rotate(float x, float y);

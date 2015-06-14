@@ -44,6 +44,8 @@ class Master
 		void run();
 		void animate(int dt);
 		void display();
+		
+		void switchMode();
 
 
 };

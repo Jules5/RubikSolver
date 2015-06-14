@@ -13,4 +13,6 @@ enum TypeCube  {CENTER, EDGE, CORNER, UNKNOW_TYPE};
 
 enum ButtonsPlayer  {PLAY_FAST_REV, PLAY_ONE_REV, PLAY, PLAY_ONE, PLAY_FAST};
 
+enum BrowserParameters {FILE_CREATE, NB_PARAMETERS, NULL_PARAMETER};
+
 #endif

@@ -40,7 +40,7 @@ Rubik3x3::Rubik3x3(float x, float y, float s, string filename)
 	// glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
 	// glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
 
-	GLfloat position[] = { 0, 0, 1, 1};
+	GLfloat position[] = { 0, 0, 0, 1};
 	GLfloat LightAmbient[] = { 1.0f, 1.0f, 1.0f, 1.f };
 	GLfloat LightDiffuse[]= { 0.6f, 0.6f, 0.6f, 1.f };
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
@@ -337,9 +337,9 @@ void Rubik3x3::loadRubikComplete()
 
 void Rubik3x3::loadRubikFromFile(string filename)
 {
-	ifstream file(filename.c_str(), ios::in);  // on ouvre en lecture
+	ifstream file(filename.c_str(), ios::in); 
 
-    if(!file)  // si l'ouverture a fonctionné
+    if(!file)
     {
         cerr << "Impossible d'ouvrir le fichier !" << endl;
         loadRubikComplete();
@@ -414,6 +414,51 @@ void Rubik3x3::loadRubikFromOther(Rubik3x3* r)
 				cubes[i][j][k]->copyColors(r->cubes[i][j][k]);
 }
 
+
+
+void Rubik3x3::saveIntoFile(string filename)
+{
+	RubikColor colors[54];
+
+	int ind = 0;
+
+	// FACE AVANT 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[FRONT][i]->colors[FRONT].getRubikColor();
+
+	// FACE DROITE 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[RIGHT][i]->colors[RIGHT].getRubikColor();
+
+	// FACE HAUTE 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[TOP][i]->colors[TOP].getRubikColor();
+
+	// FACE GAUCHE 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[LEFT][i]->colors[LEFT].getRubikColor();
+
+	// FACE BASSE 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[BOTTOM][i]->colors[BOTTOM].getRubikColor();
+
+	// FACE ARRIERE 
+	for(int i=0; i<9; ++i)
+		colors[ind++] = moves_set[BACK][i]->colors[BACK].getRubikColor();
+
+	ofstream file(filename.c_str(), ios::out | ios::trunc);
+
+    if(!file) 
+    {
+        cerr << "Impossible d'ouvrir le fichier !" << endl;
+        return;
+    }
+
+    for(int i=0; i<54; ++i)
+    	file << (unsigned char)(colors[i]);
+
+	file.close();
+}
 
 
 

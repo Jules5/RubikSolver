@@ -6,6 +6,7 @@
 #include <GL/gl.h>
 #include <dirent.h>
 
+#include "Enums.h"
 #include "Master.h"
 #include "Button.h"
 
@@ -29,6 +30,8 @@ class Browser
 		vector<GLuint> textures;
 		vector<float> textures_width;
 
+		bool run;
+
 		float width;
 		float height;
 		float x;
@@ -48,6 +51,12 @@ class Browser
 
 		float elevator_width;
 
+		bool create_file;
+		float creator_height;
+
+		GLuint saisie_texture;
+		float saisie_width;
+
 
 		Browser(Master* m, TTF_Font* font, string path="");
 		~Browser();
@@ -58,9 +67,12 @@ class Browser
 
 		void updateFiles();
 		void sortFiles();
-		string getFile();
+		string getFile(bool create=false);
+
+		void detectChar(SDL_Event* event, string* filename);
 
 		void buildTextures();
+		void buildTextureSaisie(string);
 
 		void gestionHover(SDL_Event* event);
 		void gestionWheel(SDL_Event* event);

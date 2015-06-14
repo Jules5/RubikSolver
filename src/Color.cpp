@@ -86,6 +86,7 @@ void Color::setGlColor()
 
 
 
+
 RubikColor Color::getRubikColor()
 {
 	     if(*this == WHITE)  return WHITE;
