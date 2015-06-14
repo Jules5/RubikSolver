@@ -50,4 +50,4 @@ add :
 	@git add . --verbose
 
 init :
-	mkdir -p obj
+	mkdir -p obj saves
