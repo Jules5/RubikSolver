@@ -1,17 +1,11 @@
 # RubikSolver
 
-Un résolveur de Rubik's Cube 3x3x3 en 3D. 
-
-Deux éxécutables :
-
-
-* RubikSolver : Pour résoudre le Rubik's Cube.
-* RubikEditor : Pour entrer votre propre combinaison.
+Un résolveur/éditeur de Rubik's Cube 3x3x3 en 3D. 
 
 
 ## Installation
 
-Les libs suivantes doivent être installées : SDL, SDL-image et SDL-ttf.
+Les libs suivantes doivent être installées : SDL, SDL-image, SDL-ttf, freeglut.
 
 Commande : make init
 
@@ -21,29 +15,11 @@ La commande "make" permet ensuite de compiler et d'éxécuter.
 
 ## Utilisation
 
-
-### RubikSolver
-
-ESPACE pour résoudre le Rubik's Cube.
-
-R pour mélanger.
-
-
-### RubikEditor
-
-La face à remplir est affichée, la case du milieu sert de  repère.
-
-Les cases autour de la face servent de repère pour les faces adjacentes.
-
-Cliquez sur les cases pour changer de couleur.
-
-Utilisez les flèches pour changer de face.
-
-Pour sauvegarder tapez ENTREE, le nom du fichier à créer puis ENTREE à nouveau.
+Le programme démarre et affiche un Rubik's Cube complété qu'il est possible de mélanger puis de résoudre. Vous pouvez aussi lancer l'éditeur qui vous permet d'entrer votre propre combinaison.
 
 
 
-ATTENTION : Pour le moment, RubikSolver charge le fichier nommé "test" seulement.
+ATTENTION : Pour le moment, le programme ne vérifie pas que votre combinaison est valide, donc faites attention !
 
 
 
