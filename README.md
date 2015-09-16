@@ -5,7 +5,7 @@ Un résolveur/éditeur de Rubik's Cube 3x3x3 en 3D.
 
 ## Installation
 
-Les libs suivantes doivent être installées : SDL, SDL-image, SDL-ttf, freeglut.
+Les libs de développement suivantes doivent être installées : SDL, SDL-image, SDL-ttf, freeglut.
 
 Commande : make init
 

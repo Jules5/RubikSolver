@@ -56,7 +56,7 @@ Resolver::Resolver(Master* m, TTF_Font* f)
 	player_cursor_x = 0;
 	player_cursor_hover = false;
 
-	speed_rubik_normal = 4;
+	speed_rubik_normal = 2;
 	speed_rubik_fast   = 6;
 }
 
